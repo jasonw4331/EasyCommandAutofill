@@ -12,6 +12,8 @@ class Main extends PluginBase implements Listener {
 	private static $instance;
 	/** @var CommandData[] $manualOverrides */
 	protected $manualOverrides = [];
+	/** @var string[] $debugCommands */
+	protected $debugCommands = [];
 
 	/**
 	 * @return self
@@ -26,6 +28,7 @@ class Main extends PluginBase implements Listener {
 
 	public function onEnable() {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+		$this->debugCommands = ["dumpmemory", "gc", "timings", "status"];
 	}
 
 	/**
@@ -44,6 +47,23 @@ class Main extends PluginBase implements Listener {
 	 */
 	public function getManualOverrides() : array {
 		return $this->manualOverrides;
+	}
+
+	/**
+	 * @param string $debugCommands
+	 *
+	 * @return self
+	 */
+	public function addDebugCommand(string $debugCommands) : self {
+		$this->debugCommands[] = $debugCommands;
+		return $this;
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function getDebugCommands() : array {
+		return $this->debugCommands;
 	}
 
 	public function onPlayerCreate(PlayerCreationEvent $event) {
