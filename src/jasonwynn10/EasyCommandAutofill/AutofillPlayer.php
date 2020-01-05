@@ -26,7 +26,7 @@ class AutofillPlayer extends Player {
 				//TODO: commands containing uppercase letters in the name crash 1.9.0 client
 				$data->commandName = strtolower($command->getName());
 				$data->commandDescription = $this->server->getLanguage()->translateString($command->getDescription());
-				$data->flags = 0;
+				$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands());
 				$data->permission = 0;
 
 				$parameter = new CommandParameter();
@@ -57,7 +57,7 @@ class AutofillPlayer extends Player {
 				//TODO: commands containing uppercase letters in the name crash 1.9.0 client
 				$data->commandName = strtolower($command->getName());
 				$data->commandDescription = $this->server->getLanguage()->translateString($command->getDescription());
-				$data->flags = 0;
+				$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands());
 				$data->permission = 0;
 
 				$parameter = new CommandParameter();
@@ -83,8 +83,8 @@ class AutofillPlayer extends Player {
 			//TODO: commands containing uppercase letters in the name crash 1.9.0 client
 			$data->commandName = strtolower($command->getName());
 			$data->commandDescription = Server::getInstance()->getLanguage()->translateString($command->getDescription());
-			$data->flags = 0; // TODO: Why does this set the autofill text to blue? WHAT IS THE PURPOSE
-			$data->permission = (int)$command->testPermissionSilent($this); // TODO: Is this a bool value for command permissions yes/no?
+			$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands()); // make command autofill blue if debug
+			$data->permission = (int)$command->testPermissionSilent($this); // hide commands players do not have permission to use
 			for($argNumber = 0; $argNumber <= $argumentCount; ++$argNumber) {
 				$paramName = strtolower($matches[2][$argNumber]);
 				$fieldType = strtolower($matches[4][$argNumber]);
