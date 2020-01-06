@@ -100,6 +100,11 @@ class Main extends PluginBase implements Listener {
 				continue;
 			}
 			$usages = explode(" OR ", $usage); // split command trees
+			$data = new CommandData();
+			$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
+			$data->commandDescription = Server::getInstance()->getLanguage()->translateString($command->getDescription());
+			$data->flags = (int)in_array($command->getName(), $this->getDebugCommands()); // make command autofill blue if debug
+			$data->permission = (int)$command->testPermissionSilent($event->getPlayer()); // hide commands players do not have permission to use
 			$enumCount = 0;
 			for($tree = 0; $tree < count($usages); ++$tree) {
 				$usage = $usages[$tree];
@@ -126,11 +131,6 @@ class Main extends PluginBase implements Listener {
 					$pk->commandData[$command->getName()] = $data;
 					continue;
 				}
-				$data = new CommandData();
-				$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
-				$data->commandDescription = Server::getInstance()->getLanguage()->translateString($command->getDescription());
-				$data->flags = (int)in_array($command->getName(), $this->getDebugCommands()); // make command autofill blue if debug
-				$data->permission = (int)$command->testPermissionSilent($event->getPlayer()); // hide commands players do not have permission to use
 				for($argNumber = 0; $argNumber <= $argumentCount; ++$argNumber) {
 					$optional = empty($matches[1][$argNumber]) ? false : ($matches[1][$argNumber] === '[');
 					$paramName = strtolower($matches[2][$argNumber]);
