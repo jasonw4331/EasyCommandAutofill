@@ -135,7 +135,7 @@ class AutofillPlayer extends Player {
 					$parameter->paramName = $paramName;
 					$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_ENUM | AvailableCommandsPacket::ARG_FLAG_VALID | $enumCount;
 					$enum = new CommandEnum();
-					$enum->enumName = "string"; // TODO
+					$enum->enumName = $data->commandName." SubCommand #".$argNumber; // TODO: change to readable name in case parameter flag is 0
 					$enum->enumValues = $enumValues;
 					$parameter->enum = $enum;
 					$parameter->flags = 1; // TODO
