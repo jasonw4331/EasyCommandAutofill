@@ -19,7 +19,7 @@ class AutofillPlayer extends Player {
 				$pk->commandData[$command->getName()] = Main::getInstance()->getManualOverrides()[$name];
 				continue;
 			}
-			$usage = $command->getUsage();
+			$usage = $this->server->getLanguage()->translateString($command->getUsage());
 			//var_dump($this->server->getLanguage()->translateString($usage));
 			if(empty($usage) or $usage[0] === '%') {
 				$data = new CommandData();
@@ -49,7 +49,7 @@ class AutofillPlayer extends Player {
 				continue;
 			}
 			$commandString = explode(" ", $usage)[0];
-			preg_match_all('/(\s[<\[])((?:[a-zA-Z0-9]+))((\s*:\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean))?([>\]])/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
+			preg_match_all('/(\s*[<\[]\s*)((?:[a-zA-Z0-9]+)((\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean))|([a-zA-Z0-9]+(\|[a-zA-Z0-9]+)?)+)(\s*[>\]]\s*)/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 			//var_dump($usage, $matches);
 			$argumentCount = count($matches[0])-1;
 			if($argumentCount < 0 and $command->testPermissionSilent($this)) {
