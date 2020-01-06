@@ -1,1 +1,5 @@
 Parse-with-Parameter-Names: true
+
+# Debug Command Highlighting
+# When enabled, a selection of debugging commands will be highlighted blue in the autofill
+Highlight-Debug: false

@@ -19,7 +19,8 @@ class Main extends PluginBase implements Listener {
 
 	public function onEnable() {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-		$this->debugCommands = ["dumpmemory", "gc", "timings", "status"];
+		if($this->getConfig()->get("Highlight-Debug", true))
+			$this->debugCommands = ["dumpmemory", "gc", "timings", "status"];
 	}
 
 	/**
