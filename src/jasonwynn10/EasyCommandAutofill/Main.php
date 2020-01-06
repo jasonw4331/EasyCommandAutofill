@@ -191,7 +191,7 @@ class Main extends PluginBase implements Listener {
 						$parameter->paramName = $paramName;
 						$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_ENUM | AvailableCommandsPacket::ARG_FLAG_VALID | $enumCount;
 						$enum = new CommandEnum();
-						$enum->enumName = $data->commandName." Enum#".$enumCount; // TODO: change to readable name in case parameter flag is 0
+						$enum->enumName = $data->commandName." Enum#".$enumCount; // TODO: change to readable name
 						$enum->enumValues = $enumValues;
 						$parameter->enum = $enum;
 						$parameter->flags = 1;
