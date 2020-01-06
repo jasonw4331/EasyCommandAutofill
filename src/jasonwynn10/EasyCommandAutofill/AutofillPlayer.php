@@ -60,12 +60,6 @@ class AutofillPlayer extends Player {
 				$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands());
 				$data->permission = 0;
 
-				$parameter = new CommandParameter();
-				$parameter->paramName = "args";
-				$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-				$parameter->isOptional = true;
-				$data->overloads[0][0] = $parameter;
-
 				$aliases = $command->getAliases();
 				if(count($aliases) > 0){
 					if(!in_array($data->commandName, $aliases, true)){
