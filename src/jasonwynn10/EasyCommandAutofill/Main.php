@@ -132,11 +132,7 @@ class Main extends PluginBase implements Listener {
 				$data->flags = (int)in_array($command->getName(), $this->getDebugCommands()); // make command autofill blue if debug
 				$data->permission = (int)$command->testPermissionSilent($event->getPlayer()); // hide commands players do not have permission to use
 				for($argNumber = 0; $argNumber <= $argumentCount; ++$argNumber) {
-					if(!empty($matches[1][$argNumber])) {
-						$optional = $matches[1][$argNumber] === '[';
-					}else{
-						$optional = false;
-					}
+					$optional = empty($matches[1][$argNumber]) ? false : ($matches[1][$argNumber] === '[');
 					$paramName = strtolower($matches[2][$argNumber]);
 					if(stripos($paramName, "|") === false) {
 						if(empty($matches[3][$argNumber]) and $this->getConfig()->get("Parse-with-Parameter-Names", true)) {
