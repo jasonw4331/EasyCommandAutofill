@@ -20,7 +20,7 @@ class AutofillPlayer extends Player {
 				continue;
 			}
 			$usage = $this->server->getLanguage()->translateString($command->getUsage());
-			//var_dump($this->server->getLanguage()->translateString($usage));
+			//var_dump($usage);
 			if(empty($usage) or $usage[0] === '%') {
 				$data = new CommandData();
 				//TODO: commands containing uppercase letters in the name crash 1.9.0 client
@@ -150,9 +150,9 @@ class AutofillPlayer extends Player {
 					$parameter->isOptional = $optional;
 					$data->overloads[0][$argNumber] = $parameter;
 
-					$pk->hardcodedEnums[] = $enum; // TODO
-					$pk->softEnums[] = $enum; // TODO
-					//$pk->enumConstraints[] = new CommandEnumConstraint();
+					//$pk->hardcodedEnums[] = $enum; // TODO
+					//$pk->softEnums[] = $enum; // TODO
+					//$pk->enumConstraints[] = new \pocketmine\network\mcpe\protocol\types\CommandEnumConstraint($enum, 0, []); // TODO
 				}
 			}
 			$aliases = $command->getAliases();
