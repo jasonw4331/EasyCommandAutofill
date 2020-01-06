@@ -31,6 +31,9 @@ class Main extends PluginBase implements Listener {
 	 */
 	public function addManualOverride(string $commandName, CommandData $data) : self {
 		$this->manualOverrides[$commandName] = $data;
+		foreach($this->getServer()->getOnlinePlayers() as $player) {
+			$player->sendDataPacket(new AvailableCommandsPacket());
+		}
 		return $this;
 	}
 
@@ -48,6 +51,9 @@ class Main extends PluginBase implements Listener {
 	 */
 	public function addDebugCommand(string $commandName) : self {
 		$this->debugCommands[] = $commandName;
+		foreach($this->getServer()->getOnlinePlayers() as $player) {
+			$player->sendDataPacket(new AvailableCommandsPacket());
+		}
 		return $this;
 	}
 
