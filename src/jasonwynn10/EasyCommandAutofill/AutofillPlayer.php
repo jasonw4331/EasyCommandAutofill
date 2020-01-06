@@ -50,7 +50,6 @@ class AutofillPlayer extends Player {
 			}
 			$commandString = explode(" ", $usage)[0];
 			preg_match_all('/(\s*[<\[]\s*)((?:[a-zA-Z0-9]+)((\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean))|([a-zA-Z0-9]+(\|[a-zA-Z0-9]+)?)+)(\s*[>\]]\s*)/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
-			//var_dump($usage, $matches);
 			$argumentCount = count($matches[0])-1;
 			if($argumentCount < 0 and $command->testPermissionSilent($this)) {
 				$data = new CommandData();
@@ -88,40 +87,49 @@ class AutofillPlayer extends Player {
 				}
 				$paramName = strtolower($matches[2][$argNumber]);
 				if(strpos($paramName, "|") === false) {
-					$fieldType = strtolower($matches[4][$argNumber]);
-					switch($fieldType) {
-						case "string":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_STRING;
-						break;
-						case "int":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
-						break;
-						case "x y z":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_POSITION;
-						break;
-						case "float":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_FLOAT;
-						break;
-						case "target":
+					if(Main::getInstance()->getConfig()->get("Parse-with-Parameter-Names", true)) {
+						if(strpos($paramName, "player") !== false or strpos($paramName, "target") !== false) {
 							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-						break;
-						case "message":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_MESSAGE;
-						break;
-						case "json":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_JSON;
-						break;
-						case "command":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_COMMAND;
-						break;
-						case "boolean":
-						case "mixed":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_VALUE;
-						break;
-						default:
-						case "text":
-							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-						break;
+						}elseif(strpos($paramName, "count") !== false) {
+							$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
+						}
+					}
+					if(!isset($paramType)){
+						$fieldType = strtolower($matches[4][$argNumber]);
+						switch($fieldType) {
+							case "string":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_STRING;
+							break;
+							case "int":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
+							break;
+							case "x y z":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_POSITION;
+							break;
+							case "float":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_FLOAT;
+							break;
+							case "target":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
+							break;
+							case "message":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_MESSAGE;
+							break;
+							case "json":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_JSON;
+							break;
+							case "command":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_COMMAND;
+							break;
+							case "boolean":
+							case "mixed":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_VALUE;
+							break;
+							default:
+							case "text":
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
+							break;
+						}
 					}
 					$parameter = new CommandParameter();
 					$parameter->paramName = $paramName;
