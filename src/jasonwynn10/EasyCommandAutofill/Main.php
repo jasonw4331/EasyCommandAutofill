@@ -91,7 +91,7 @@ class Main extends PluginBase implements Listener {
 				$data->commandName = strtolower($command->getName());
 				$data->commandDescription = $this->getServer()->getLanguage()->translateString($command->getDescription());
 				$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands());
-				$data->permission = 0;
+				$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
 
 				$parameter = new CommandParameter();
 				$parameter->paramName = "args";
@@ -120,13 +120,13 @@ class Main extends PluginBase implements Listener {
 				$commandString = explode(" ", $usage)[0];
 				preg_match_all('/(\s*[<\[]\s*)((?:[a-zA-Z0-9]+)((\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean))|([a-zA-Z0-9]+(\|[a-zA-Z0-9]+)?)+)(\s*[>\]]\s*)/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 				$argumentCount = count($matches[0])-1;
-				if($argumentCount < 0 and $command->testPermissionSilent($event->getPlayer())) {
+				if($argumentCount < 0) {
 					$data = new CommandData();
 					//TODO: commands containing uppercase letters in the name crash 1.9.0 client
 					$data->commandName = strtolower($command->getName());
 					$data->commandDescription = $this->getServer()->getLanguage()->translateString($command->getDescription());
 					$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands());
-					$data->permission = 0;
+					$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
 
 					$aliases = $command->getAliases();
 					if(count($aliases) > 0){
