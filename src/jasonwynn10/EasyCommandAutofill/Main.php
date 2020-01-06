@@ -105,7 +105,7 @@ class Main extends PluginBase implements Listener {
 			for($tree = 0; $tree < count($usages); ++$tree) {
 				$usage = $usages[$tree];
 				$commandString = explode(" ", $usage)[0];
-				preg_match_all('/(\s*[<\[]\s*)((?:([a-zA-Z0-9]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean))|(?:(?:[a-zA-Z0-9]+)(?:\|[a-zA-Z0-9]+)?)+)(?:\s*[>\]]\s*)/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
+				preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9\|]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean)?(?:\s*[>\]]?\s?)/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 				$argumentCount = count($matches[0])-1;
 				if($argumentCount < 0) {
 					$data = new CommandData();
@@ -150,7 +150,7 @@ class Main extends PluginBase implements Listener {
 							}
 						}
 						if(!isset($paramType)){
-							$fieldType = strtolower($matches[4][$argNumber]);
+							$fieldType = strtolower($matches[3][$argNumber]);
 							switch($fieldType) {
 								case "string":
 									$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_STRING;
