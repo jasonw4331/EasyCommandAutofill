@@ -12,23 +12,10 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 
 class Main extends PluginBase implements Listener {
-	/** @var self $instance */
-	private static $instance;
 	/** @var CommandData[] $manualOverrides */
 	protected $manualOverrides = [];
 	/** @var string[] $debugCommands */
 	protected $debugCommands = [];
-
-	/**
-	 * @return self
-	 */
-	public static function getInstance() : self {
-		return self::$instance;
-	}
-
-	public function onLoad() {
-		self::$instance = $this;
-	}
 
 	public function onEnable() {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
@@ -80,8 +67,8 @@ class Main extends PluginBase implements Listener {
 		foreach($this->getServer()->getCommandMap()->getCommands() as $name => $command) {
 			if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help")
 				continue;
-			if(in_array($command->getName(), array_keys(Main::getInstance()->getManualOverrides()))) {
-				$pk->commandData[$command->getName()] = Main::getInstance()->getManualOverrides()[$name];
+			if(in_array($command->getName(), array_keys($this->getManualOverrides()))) {
+				$pk->commandData[$command->getName()] = $this->getManualOverrides()[$name];
 				continue;
 			}
 			$usage = $this->getServer()->getLanguage()->translateString($command->getUsage());
@@ -90,7 +77,7 @@ class Main extends PluginBase implements Listener {
 				//TODO: commands containing uppercase letters in the name crash 1.9.0 client
 				$data->commandName = strtolower($command->getName());
 				$data->commandDescription = $this->getServer()->getLanguage()->translateString($command->getDescription());
-				$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands());
+				$data->flags = (int)in_array($command->getName(), $this->getDebugCommands());
 				$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
 
 				$parameter = new CommandParameter();
@@ -116,16 +103,15 @@ class Main extends PluginBase implements Listener {
 			$enumCount = 0;
 			for($tree = 0; $tree < count($usages); ++$tree) {
 				$usage = $usages[$tree];
-				var_dump($usage);
 				$commandString = explode(" ", $usage)[0];
-				preg_match_all('/(\s*[<\[]\s*)((?:[a-zA-Z0-9]+)((\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean))|([a-zA-Z0-9]+(\|[a-zA-Z0-9]+)?)+)(\s*[>\]]\s*)/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
+				preg_match_all('/(\s*[<\[]\s*)((?:([a-zA-Z0-9]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean))|(?:(?:[a-zA-Z0-9]+)(?:\|[a-zA-Z0-9]+)?)+)(?:\s*[>\]]\s*)/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 				$argumentCount = count($matches[0])-1;
 				if($argumentCount < 0) {
 					$data = new CommandData();
 					//TODO: commands containing uppercase letters in the name crash 1.9.0 client
 					$data->commandName = strtolower($command->getName());
 					$data->commandDescription = $this->getServer()->getLanguage()->translateString($command->getDescription());
-					$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands());
+					$data->flags = (int)in_array($command->getName(), $this->getDebugCommands());
 					$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
 
 					$aliases = $command->getAliases();
@@ -145,7 +131,7 @@ class Main extends PluginBase implements Listener {
 				//TODO: commands containing uppercase letters in the name crash 1.9.0 client
 				$data->commandName = strtolower($command->getName());
 				$data->commandDescription = Server::getInstance()->getLanguage()->translateString($command->getDescription());
-				$data->flags = (int)in_array($command->getName(), Main::getInstance()->getDebugCommands()); // make command autofill blue if debug
+				$data->flags = (int)in_array($command->getName(), $this->getDebugCommands()); // make command autofill blue if debug
 				$data->permission = (int)$command->testPermissionSilent($event->getPlayer()); // hide commands players do not have permission to use
 				for($argNumber = 0; $argNumber <= $argumentCount; ++$argNumber) {
 					if(!empty($matches[1][$argNumber])) {
@@ -155,7 +141,7 @@ class Main extends PluginBase implements Listener {
 					}
 					$paramName = strtolower($matches[2][$argNumber]);
 					if(strpos($paramName, "|") === false) {
-						if(Main::getInstance()->getConfig()->get("Parse-with-Parameter-Names", true)) {
+						if($this->getConfig()->get("Parse-with-Parameter-Names", true)) {
 							if(strpos($paramName, "player") !== false or strpos($paramName, "target") !== false) {
 								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
 							}elseif(strpos($paramName, "count") !== false) {
