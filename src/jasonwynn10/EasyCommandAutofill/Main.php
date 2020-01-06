@@ -104,7 +104,7 @@ class Main extends PluginBase implements Listener {
 			for($tree = 0; $tree < count($usages); ++$tree) {
 				$usage = $usages[$tree];
 				$commandString = explode(" ", $usage)[0];
-				preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9\|]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean)?(?:\s*[>\]]?\s?)/ius', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
+				preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9|]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean)?(?:\s*[>\]]?\s?)/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 				$argumentCount = count($matches[0])-1;
 				if($argumentCount < 0) {
 					$data = new CommandData();
