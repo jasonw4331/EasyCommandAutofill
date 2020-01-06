@@ -42,12 +42,12 @@ class Main extends PluginBase implements Listener {
 	}
 
 	/**
-	 * @param string $debugCommands
+	 * @param string $commandName
 	 *
 	 * @return self
 	 */
-	public function addDebugCommand(string $debugCommands) : self {
-		$this->debugCommands[] = $debugCommands;
+	public function addDebugCommand(string $commandName) : self {
+		$this->debugCommands[] = $commandName;
 		return $this;
 	}
 
