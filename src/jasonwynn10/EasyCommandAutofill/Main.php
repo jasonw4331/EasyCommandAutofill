@@ -75,8 +75,7 @@ class Main extends PluginBase implements Listener {
 			$usage = $this->getServer()->getLanguage()->translateString($command->getUsage());
 			if(empty($usage) or $usage[0] === '%') {
 				$data = new CommandData();
-				//TODO: commands containing uppercase letters in the name crash 1.9.0 client
-				$data->commandName = strtolower($command->getName());
+				$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
 				$data->commandDescription = $this->getServer()->getLanguage()->translateString($command->getDescription());
 				$data->flags = (int)in_array($command->getName(), $this->getDebugCommands());
 				$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
@@ -109,8 +108,7 @@ class Main extends PluginBase implements Listener {
 				$argumentCount = count($matches[0])-1;
 				if($argumentCount < 0) {
 					$data = new CommandData();
-					//TODO: commands containing uppercase letters in the name crash 1.9.0 client
-					$data->commandName = strtolower($command->getName());
+					$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
 					$data->commandDescription = $this->getServer()->getLanguage()->translateString($command->getDescription());
 					$data->flags = (int)in_array($command->getName(), $this->getDebugCommands());
 					$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
@@ -129,8 +127,7 @@ class Main extends PluginBase implements Listener {
 					continue;
 				}
 				$data = new CommandData();
-				//TODO: commands containing uppercase letters in the name crash 1.9.0 client
-				$data->commandName = strtolower($command->getName());
+				$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
 				$data->commandDescription = Server::getInstance()->getLanguage()->translateString($command->getDescription());
 				$data->flags = (int)in_array($command->getName(), $this->getDebugCommands()); // make command autofill blue if debug
 				$data->permission = (int)$command->testPermissionSilent($event->getPlayer()); // hide commands players do not have permission to use
@@ -201,13 +198,9 @@ class Main extends PluginBase implements Listener {
 						$enum->enumName = $data->commandName." Enum#".$enumCount; // TODO: change to readable name in case parameter flag is 0
 						$enum->enumValues = $enumValues;
 						$parameter->enum = $enum;
-						$parameter->flags = 1; // TODO
+						$parameter->flags = 1;
 						$parameter->isOptional = $optional;
 						$data->overloads[$tree][$argNumber] = $parameter;
-
-						//$pk->hardcodedEnums[] = $enum; // TODO
-						//$pk->softEnums[] = $enum; // TODO
-						//$pk->enumConstraints[] = new \pocketmine\network\mcpe\protocol\types\CommandEnumConstraint($enum, 0, []); // TODO
 					}
 				}
 				$aliases = $command->getAliases();
