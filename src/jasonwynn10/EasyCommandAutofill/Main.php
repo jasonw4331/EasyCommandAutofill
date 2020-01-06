@@ -64,6 +64,7 @@ class Main extends PluginBase implements Listener {
 		$pk = $event->getPacket();
 		if(!$pk instanceof AvailableCommandsPacket)
 			return;
+		$pk->commandData = [];
 		foreach($this->getServer()->getCommandMap()->getCommands() as $name => $command) {
 			if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help")
 				continue;
