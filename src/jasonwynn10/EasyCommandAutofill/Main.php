@@ -141,17 +141,17 @@ class Main extends PluginBase implements Listener {
 						$optional = false;
 					}
 					$paramName = strtolower($matches[2][$argNumber]);
-					if(strpos($paramName, "|") === false) {
-						if($this->getConfig()->get("Parse-with-Parameter-Names", true)) {
-							if(strpos($paramName, "player") !== false or strpos($paramName, "target") !== false) {
+					if(stripos($paramName, "|") === false) {
+						if(empty($matches[3][$argNumber]) and $this->getConfig()->get("Parse-with-Parameter-Names", true)) {
+							if(stripos($paramName, "player") !== false or stripos($paramName, "target") !== false) {
 								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-							}elseif(strpos($paramName, "count") !== false) {
+							}elseif(stripos($paramName, "count") !== false) {
 								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
+							}else{
+								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
 							}
-						}
-						if(!isset($paramType)){
-							$fieldType = strtolower($matches[3][$argNumber]);
-							switch($fieldType) {
+						}else{
+							switch(strtolower($matches[3][$argNumber])) {
 								case "string":
 									$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_STRING;
 								break;
