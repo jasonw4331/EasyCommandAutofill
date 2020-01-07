@@ -76,7 +76,9 @@ class Main extends PluginBase implements Listener {
 			if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help")
 				continue;
 			if(in_array($command->getName(), array_keys($this->getManualOverrides()))) {
-				$pk->commandData[$command->getName()] = $this->getManualOverrides()[$name];
+				$data = $this->getManualOverrides()[$name];
+				$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
+				$pk->commandData[$command->getName()] = $data;
 				continue;
 			}
 			$usage = $this->getServer()->getLanguage()->translateString($command->getUsage());
