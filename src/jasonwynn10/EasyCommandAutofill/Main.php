@@ -144,7 +144,20 @@ class Main extends PluginBase implements Listener {
 					continue;
 				}
 				for($argNumber = 0; $argNumber <= $argumentCount; ++$argNumber) {
-					$optional = empty($matches[1][$argNumber]) ? false : ($matches[1][$argNumber] === '[');
+					if(empty($matches[1][$argNumber])) {
+						$parameter = new CommandParameter();
+						$parameter->paramName = strtolower($matches[2][$argNumber]);
+						$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_ENUM | AvailableCommandsPacket::ARG_FLAG_VALID | $enumCount++;
+						$enum = new CommandEnum();
+						$enum->enumName = strtolower($matches[2][$argNumber]);
+						$enum->enumValues = [strtolower($matches[2][$argNumber])];
+						$parameter->enum = $enum;
+						$parameter->flags = 1;
+						$parameter->isOptional = false;
+						$data->overloads[$tree][0] = $parameter;
+						continue;
+					}
+					$optional = $matches[1][$argNumber] === '[';
 					$paramName = strtolower($matches[2][$argNumber]);
 					if(stripos($paramName, "|") === false) {
 						if(empty($matches[3][$argNumber]) and $this->getConfig()->get("Parse-with-Parameter-Names", true)) {
