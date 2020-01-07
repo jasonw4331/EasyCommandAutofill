@@ -1,5 +1,5 @@
 # EasyCommandAutofill
-[![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/tZQMhBQ)
+[![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/R7kdetE)
 [![Poggit-Ci](https://poggit.pmmp.io/ci.shield/jasonwynn10/EasyCommandAutofill/EasyCommandAutofill)](https://poggit.pmmp.io/ci/jasonwynn10/EasyCommandAutofill/EasyCommandAutofill)
 [![Download count](https://poggit.pmmp.io/shield.dl.total/EasyCommandAutofill)](https://poggit.pmmp.io/p/EasyCommandAutofill)
 
