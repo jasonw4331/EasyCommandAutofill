@@ -37,8 +37,8 @@ class EventListener implements Listener {
 		foreach($this->plugin->getServer()->getCommandMap()->getCommands() as $name => $command) {
 			if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help")
 				continue;
-			if(in_array($command->getName(), array_keys($this->getManualOverrides()))) {
-				$data = $this->getManualOverrides()[$command->getName()];
+			if(in_array($command->getName(), array_keys($this->plugin->getManualOverrides()))) {
+				$data = $this->plugin->getManualOverrides()[$command->getName()];
 				$data->commandName = $data->commandName ?? $command->getName();
 				$data->commandDescription = $data->commandDescription ?? $command->getDescription();
 				$data->flags = $data->flags ?? 0;
@@ -51,7 +51,7 @@ class EventListener implements Listener {
 				$data = new CommandData();
 				$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
 				$data->commandDescription = $this->plugin->getServer()->getLanguage()->translateString($command->getDescription());
-				$data->flags = (int)in_array($command->getName(), $this->getDebugCommands());
+				$data->flags = (int)in_array($command->getName(), $this->plugin->getDebugCommands());
 				$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
 
 				$parameter = new CommandParameter();
