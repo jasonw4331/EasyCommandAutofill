@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 namespace jasonwynn10\EasyCommandAutofill;
 
 use pocketmine\event\Listener;
