@@ -158,7 +158,15 @@ class Main extends PluginBase{
 				}
 				return $this;
 			}
-		throw new \InvalidArgumentException("Soft enum is already in hardcoded enum list.");
+		foreach($this->softEnums as $softEnum)
+			if($enumConstraint->getEnum()->enumName === $softEnum->enumName) {
+				$this->enumConstraints[] = $enumConstraint;
+				foreach($this->getServer()->getOnlinePlayers() as $player) {
+					$player->sendDataPacket(new AvailableCommandsPacket());
+				}
+				return $this;
+			}
+		throw new \InvalidArgumentException("Enum name does not exist in any Enum list");
 	}
 
 	/**
