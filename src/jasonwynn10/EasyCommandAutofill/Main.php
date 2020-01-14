@@ -2,6 +2,8 @@
 declare(strict_types=1);
 namespace jasonwynn10\EasyCommandAutofill;
 
+use pocketmine\item\ItemFactory;
+use pocketmine\level\Level;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
@@ -25,6 +27,40 @@ class Main extends PluginBase{
 		new EventListener($this);
 		if($this->getConfig()->get("Highlight-Debug", true))
 			$this->debugCommands = ["dumpmemory", "gc", "timings", "status"];
+		if($this->getConfig()->get("Add-Common-Enums", true)) {
+			$enum = new CommandEnum();
+			$enum->enumName = "World";
+			$enum->enumValues = array_map(function(Level $var) {
+				return $var->getFolderName();
+			}, $this->getServer()->getLevels());
+			$this->addSoftEnum($enum);
+
+			$enum = new CommandEnum();
+			$enum->enumName = "itemName";
+			$items = [];
+			for($i = 0; $i < 256; ++$i) {
+				for($m = 0; $m < 16; ++$m) {
+					$item = ItemFactory::get($i, $m);
+					if($item->getName())
+						$items[] = strtolower(str_replace(" ", "_", $item->getName()));
+				}
+			}
+			$enum->enumValues = $items;
+			$this->addSoftEnum($enum);
+
+			$enum = new CommandEnum();
+			$enum->enumName = "itemId";
+			$items = [];
+			for($i = 0; $i < 256; ++$i) {
+				for($m = 0; $m < 256; ++$m) {
+					$item = ItemFactory::get($i, $m);
+					if($item->getName())
+						$items[] = (string)$item->getId();
+				}
+			}
+			$enum->enumValues = $items;
+			$this->addSoftEnum($enum);
+		}
 	}
 
 	/**
