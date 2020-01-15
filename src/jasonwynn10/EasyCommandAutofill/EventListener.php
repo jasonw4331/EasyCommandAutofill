@@ -105,7 +105,7 @@ class EventListener implements Listener {
 					continue;
 				}
 				for($argNumber = 0; $argNumber <= $argumentCount; ++$argNumber) {
-					if(empty($matches[1][$argNumber])) {
+					if(empty($matches[1][$argNumber]) or $matches[1][$argNumber] === " ") {
 						$parameter = new CommandParameter();
 						$parameter->paramName = strtolower($matches[2][$argNumber]);
 						$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_ENUM | AvailableCommandsPacket::ARG_FLAG_VALID | $enumCount++;
