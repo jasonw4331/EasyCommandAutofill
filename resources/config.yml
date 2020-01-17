@@ -14,7 +14,3 @@ Parse-with-Parameter-Names: true
 # Debug Command Highlighting
 # When enabled, a selection of debugging commands will be highlighted blue in the autofill
 Highlight-Debug: false
-
-# Add Common Enums to autofill by default
-# When enabled, a selection of Common Enum Arguments will be added in the autofill
-Add-Common-Enums: true
