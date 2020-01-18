@@ -157,6 +157,7 @@ class EventListener implements Listener {
 									$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_COMMAND;
 								break;
 								case "boolean":
+								case "bool":
 								case "mixed":
 									$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_VALUE;
 								break;
