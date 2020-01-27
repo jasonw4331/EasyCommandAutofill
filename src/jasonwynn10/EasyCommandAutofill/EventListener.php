@@ -82,7 +82,7 @@ class EventListener implements Listener {
 			for($tree = 0; $tree < count($usages); ++$tree) {
 				$usage = $usages[$tree];
 				$commandString = explode(" ", $usage)[0];
-				preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9|]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean|bool|player)?(?:\s*[>\]]?\s?)/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
+				preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9|\/]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean|bool|player)?(?:\s*[>\]]?\s?)/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 				$argumentCount = count($matches[0])-1;
 				if($argumentCount < 0) {
 					$data = new CommandData();
@@ -121,7 +121,7 @@ class EventListener implements Listener {
 					}
 					$optional = $matches[1][$argNumber] === '[';
 					$paramName = strtolower($matches[2][$argNumber]);
-					if(stripos($paramName, "|") === false) {
+					if(stripos($paramName, "|") === false and stripos($paramName, "/") === false) {
 						if(empty($matches[3][$argNumber]) and $this->plugin->getConfig()->get("Parse-with-Parameter-Names", true)) {
 							if(stripos($paramName, "player") !== false or stripos($paramName, "target") !== false) {
 								$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
@@ -173,9 +173,23 @@ class EventListener implements Listener {
 						$parameter->paramType = $paramType;
 						$parameter->isOptional = $optional;
 						$data->overloads[$tree][$argNumber] = $parameter;
-					}else{
+					}elseif(stripos($paramName, "|") !== false){
 						++$enumCount;
 						$enumValues = explode("|", $paramName);
+						$parameter = new CommandParameter();
+						$parameter->paramName = $paramName;
+						$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_ENUM | AvailableCommandsPacket::ARG_FLAG_VALID | $enumCount;
+						$enum = new CommandEnum();
+						$enum->enumName = $data->commandName." Enum#".$enumCount; // TODO: change to readable name
+						$enum->enumValues = $enumValues;
+						$parameter->enum = $enum;
+						$parameter->flags = 1;
+						$parameter->isOptional = $optional;
+						$data->overloads[$tree][$argNumber] = $parameter;
+						$pk->softEnums[] = $enum;
+					}else{
+						++$enumCount;
+						$enumValues = explode("/", $paramName);
 						$parameter = new CommandParameter();
 						$parameter->paramName = $paramName;
 						$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_ENUM | AvailableCommandsPacket::ARG_FLAG_VALID | $enumCount;
