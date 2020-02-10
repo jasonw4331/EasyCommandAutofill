@@ -119,7 +119,7 @@ class EventListener implements Listener {
 						$pk->hardcodedEnums[] = $enum;
 						continue;
 					}
-					$optional = $matches[1][$argNumber] === '[';
+					$optional = strpos($matches[1][$argNumber], '[') !== false;
 					$paramName = strtolower($matches[2][$argNumber]);
 					if(stripos($paramName, "|") === false and stripos($paramName, "/") === false) {
 						if(empty($matches[3][$argNumber]) and $this->plugin->getConfig()->get("Parse-with-Parameter-Names", true)) {
