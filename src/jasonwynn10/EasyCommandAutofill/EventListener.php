@@ -39,9 +39,21 @@ class EventListener implements Listener {
 			if(in_array($command->getName(), array_keys($this->plugin->getManualOverrides()))) {
 				$data = $this->plugin->getManualOverrides()[$command->getName()];
 				$data->commandName = $data->commandName ?? $command->getName();
-				$data->commandDescription = $data->commandDescription ?? $command->getDescription();
+				$data->commandDescription = $data->commandDescription ?? $this->plugin->getServer()->getLanguage()->translateString($command->getDescription());
 				$data->flags = $data->flags ?? 0;
 				$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
+				if(!$data->aliases instanceof CommandEnum) {
+					$aliases = $command->getAliases();
+					if(count($aliases) > 0){
+						if(!in_array($data->commandName, $aliases, true)){
+							//work around a client bug which makes the original name not show when aliases are used
+							$aliases[] = $data->commandName;
+						}
+						$data->aliases = new CommandEnum();
+						$data->aliases->enumName = ucfirst($command->getName()) . "Aliases";
+						$data->aliases->enumValues = $aliases;
+					}
+				}
 				$pk->commandData[$command->getName()] = $data;
 				continue;
 			}
