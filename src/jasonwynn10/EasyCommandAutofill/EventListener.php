@@ -244,7 +244,7 @@ class EventListener implements Listener {
 				$enumConstraints = $this->plugin->getEnumConstraints();
 				foreach($pk->enumConstraints as $constrainedEnum) {
 					foreach($enumConstraints as $key => $enum) {
-						if($enum->getEnum()->enumName === $constrainedEnum->enumName)
+						if($enum->getEnum()->enumName === $constrainedEnum->getEnum()->enumName)
 							unset($enumConstraints[$key]);
 					}
 				}
