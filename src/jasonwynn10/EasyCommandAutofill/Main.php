@@ -3,10 +3,10 @@ declare(strict_types=1);
 namespace jasonwynn10\EasyCommandAutofill;
 
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
-use pocketmine\network\mcpe\protocol\types\CommandData;
-use pocketmine\network\mcpe\protocol\types\CommandEnum;
-use pocketmine\network\mcpe\protocol\types\CommandEnumConstraint;
-use pocketmine\network\mcpe\protocol\types\CommandParameter;
+use pocketmine\network\mcpe\protocol\types\command\CommandData;
+use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
+use pocketmine\network\mcpe\protocol\types\command\CommandEnumConstraint;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\network\mcpe\protocol\UpdateSoftEnumPacket;
 use pocketmine\plugin\PluginBase;
 
@@ -26,14 +26,12 @@ class Main extends PluginBase{
 		new EventListener($this);
 		if($this->getConfig()->get("Highlight-Debug", true))
 			$this->debugCommands = ["dumpmemory", "gc", "timings", "status"];
-		$data = new CommandData();
-		$param = new CommandParameter();
-		$param->paramName = "new difficulty";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-		$param->isOptional = false;
-		$data->overloads[0] = [$param];
-		$this->addManualOverride("difficulty", $data);
+		$map = $this->getServer()->getCommandMap();
 
+		$command = $map->getCommand("difficulty");
+		$this->addManualOverride("difficulty", new CommandData($command->getName(), $this->getServer()->getLanguage()->translateString($command->getDescription()), 0, 1, null, [0 => [CommandParameter::standard("new difficulty", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, false)]]));
+
+		/*
 		$data = new CommandData();
 		$param = new CommandParameter();
 		$param->paramName = "player";
@@ -193,6 +191,7 @@ class Main extends PluginBase{
 		$param->isOptional = true;
 		$data->overloads[0] = [$param];
 		$this->addManualOverride("version", $data);
+		*/
 	}
 
 	/**
@@ -204,7 +203,7 @@ class Main extends PluginBase{
 	public function addManualOverride(string $commandName, CommandData $data) : self {
 		$this->manualOverrides[$commandName] = $data;
 		foreach($this->getServer()->getOnlinePlayers() as $player) {
-			$player->sendDataPacket(new AvailableCommandsPacket());
+			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
 		}
 		return $this;
 	}
@@ -224,7 +223,7 @@ class Main extends PluginBase{
 	public function addDebugCommand(string $commandName) : self {
 		$this->debugCommands[] = $commandName;
 		foreach($this->getServer()->getOnlinePlayers() as $player) {
-			$player->sendDataPacket(new AvailableCommandsPacket());
+			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
 		}
 		return $this;
 	}
@@ -243,11 +242,11 @@ class Main extends PluginBase{
 	 */
 	public function addHardcodedEnum(CommandEnum $enum) : self {
 		foreach($this->softEnums as $softEnum)
-			if($enum->enumName === $softEnum->enumName)
+			if($enum->getName() === $softEnum->getName())
 				throw new \InvalidArgumentException("Hardcoded enum is already in soft enum list.");
 		$this->hardcodedEnums[] = $enum;
 		foreach($this->getServer()->getOnlinePlayers() as $player) {
-			$player->sendDataPacket(new AvailableCommandsPacket());
+			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
 		}
 		return $this;
 	}
@@ -266,14 +265,16 @@ class Main extends PluginBase{
 	 */
 	public function addSoftEnum(CommandEnum $enum) : self {
 		foreach($this->hardcodedEnums as $hardcodedEnum)
-			if($enum->enumName === $hardcodedEnum->enumName)
+			if($enum->getName() === $hardcodedEnum->getName())
 				throw new \InvalidArgumentException("Soft enum is already in hardcoded enum list.");
 		$this->softEnums[] = $enum;
 		$pk = new UpdateSoftEnumPacket();
-		$pk->enumName = $enum->enumName;
-		$pk->values = $enum->enumValues;
+		$pk->enumName = $enum->getName();
+		$pk->values = $enum->getValues();
 		$pk->type = UpdateSoftEnumPacket::TYPE_ADD;
-		$this->getServer()->broadcastPacket($this->getServer()->getOnlinePlayers(), $pk);
+		foreach($this->getServer()->getOnlinePlayers() as $player) {
+			$player->getNetworkSession()->sendDataPacket($pk);
+		}
 		return $this;
 	}
 
@@ -291,10 +292,12 @@ class Main extends PluginBase{
 	 */
 	public function updateSoftEnum(CommandEnum $enum) : self {
 		$pk = new UpdateSoftEnumPacket();
-		$pk->enumName = $enum->enumName;
-		$pk->values = $enum->enumValues;
+		$pk->enumName = $enum->getName();
+		$pk->values = $enum->getValues();
 		$pk->type = UpdateSoftEnumPacket::TYPE_SET;
-		$this->getServer()->broadcastPacket($this->getServer()->getOnlinePlayers(), $pk);
+		foreach($this->getServer()->getOnlinePlayers() as $player) {
+			$player->getNetworkSession()->sendDataPacket($pk);
+		}
 		return $this;
 	}
 
@@ -305,10 +308,12 @@ class Main extends PluginBase{
 	 */
 	public function removeSoftEnum(CommandEnum $enum) : self {
 		$pk = new UpdateSoftEnumPacket();
-		$pk->enumName = $enum->enumName;
-		$pk->values = $enum->enumValues;
+		$pk->enumName = $enum->getName();
+		$pk->values = $enum->getValues();
 		$pk->type = UpdateSoftEnumPacket::TYPE_REMOVE;
-		$this->getServer()->broadcastPacket($this->getServer()->getOnlinePlayers(), $pk);
+		foreach($this->getServer()->getOnlinePlayers() as $player) {
+			$player->getNetworkSession()->sendDataPacket($pk);
+		}
 		return $this;
 	}
 
@@ -319,18 +324,18 @@ class Main extends PluginBase{
 	 */
 	public function addEnumConstraint(CommandEnumConstraint $enumConstraint) : self {
 		foreach($this->hardcodedEnums as $hardcodedEnum)
-			if($enumConstraint->getEnum()->enumName === $hardcodedEnum->enumName) {
+			if($enumConstraint->getEnum()->getName() === $hardcodedEnum->getName()) {
 				$this->enumConstraints[] = $enumConstraint;
 				foreach($this->getServer()->getOnlinePlayers() as $player) {
-					$player->sendDataPacket(new AvailableCommandsPacket());
+					$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
 				}
 				return $this;
 			}
 		foreach($this->softEnums as $softEnum)
-			if($enumConstraint->getEnum()->enumName === $softEnum->enumName) {
+			if($enumConstraint->getEnum()->getName() === $softEnum->getName()) {
 				$this->enumConstraints[] = $enumConstraint;
 				foreach($this->getServer()->getOnlinePlayers() as $player) {
-					$player->sendDataPacket(new AvailableCommandsPacket());
+					$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
 				}
 				return $this;
 			}
