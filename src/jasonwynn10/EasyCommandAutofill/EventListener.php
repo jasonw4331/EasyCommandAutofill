@@ -41,7 +41,7 @@ class EventListener implements Listener {
 				$data->commandName = $data->commandName ?? $command->getName();
 				$data->commandDescription = $data->commandDescription ?? $this->plugin->getServer()->getLanguage()->translateString($command->getDescription());
 				$data->flags = $data->flags ?? 0;
-				$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
+				$data->permission = (int)!$command->testPermissionSilent($event->getPlayer());
 				if(!$data->aliases instanceof CommandEnum) {
 					$aliases = $command->getAliases();
 					if(count($aliases) > 0){
@@ -63,7 +63,7 @@ class EventListener implements Listener {
 				$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
 				$data->commandDescription = $this->plugin->getServer()->getLanguage()->translateString($command->getDescription());
 				$data->flags = (int)in_array($command->getName(), $this->plugin->getDebugCommands());
-				$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
+				$data->permission = (int)!$command->testPermissionSilent($event->getPlayer());
 
 				$parameter = new CommandParameter();
 				$parameter->paramName = "args";
@@ -89,7 +89,7 @@ class EventListener implements Listener {
 			$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
 			$data->commandDescription = Server::getInstance()->getLanguage()->translateString($command->getDescription());
 			$data->flags = (int)in_array($command->getName(), $this->plugin->getDebugCommands()); // make command autofill blue if debug
-			$data->permission = (int)$command->testPermissionSilent($event->getPlayer()); // hide commands players do not have permission to use
+			$data->permission = (int)!$command->testPermissionSilent($event->getPlayer()); // hide commands players do not have permission to use
 			$enumCount = 0;
 			for($tree = 0; $tree < count($usages); ++$tree) {
 				$usage = $usages[$tree];
@@ -101,7 +101,7 @@ class EventListener implements Listener {
 					$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
 					$data->commandDescription = $this->plugin->getServer()->getLanguage()->translateString($command->getDescription());
 					$data->flags = (int)in_array($command->getName(), $this->plugin->getDebugCommands());
-					$data->permission = (int)$command->testPermissionSilent($event->getPlayer());
+					$data->permission = (int)!$command->testPermissionSilent($event->getPlayer());
 
 					$aliases = $command->getAliases();
 					if(count($aliases) > 0){
