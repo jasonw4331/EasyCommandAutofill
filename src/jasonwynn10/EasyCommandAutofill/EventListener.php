@@ -26,7 +26,7 @@ class EventListener implements Listener {
 
 	/**
 	 * @param DataPacketSendEvent $event
-	 * @priority HIGHEST
+	 * @priority HIGH
 	 */
 	public function onDataPacketSend(DataPacketSendEvent $event) {
 		$packets = $event->getPackets();
