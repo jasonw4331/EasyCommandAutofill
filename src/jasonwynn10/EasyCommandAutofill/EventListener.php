@@ -33,15 +33,15 @@ class EventListener implements Listener {
 		foreach($packets as $pk) {
 			if(!$pk instanceof AvailableCommandsPacket)
 				return;
-			foreach($event->getTargets() as $player) {
+			foreach($event->getTargets() as $networkSession) {
 				$pk->commandData = [];
 				foreach($this->plugin->getServer()->getCommandMap()->getCommands() as $name => $command) {
-					if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help")
+					if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help" or !$command->testPermissionSilent($networkSession->getPlayer()))
 						continue;
 					if(in_array($command->getName(), array_keys($this->plugin->getManualOverrides()))) {
 						$data = $this->plugin->getManualOverrides()[$command->getName()];
 						$data->flags = $data->flags ?? 0;
-						$data->permission = (int)!$command->testPermissionSilent($player->getPlayer());
+						$data->permission = (int)!$command->testPermissionSilent($networkSession->getPlayer());
 						if(!$data->aliases instanceof CommandEnum) {
 							$aliases = $command->getAliases();
 							if(count($aliases) > 0){
@@ -68,12 +68,12 @@ class EventListener implements Listener {
 						}
 						$overloads = [];
 						$overloads[0][0] = CommandParameter::standard("args", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, true);
-						$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($player->getPlayer()), $aliasEnum, $overloads);
+						$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($networkSession->getPlayer()), $aliasEnum, $overloads);
 						$pk->commandData[$command->getName()] = $data;
 						continue;
 					}
 					$usages = explode(" OR ", $usage); // split command trees
-					$data = new CommandData(strtolower($command->getName()), Server::getInstance()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($player->getPlayer()), null, []);
+					$data = new CommandData(strtolower($command->getName()), Server::getInstance()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($networkSession->getPlayer()), null, []);
 					$enumCount = 0;
 					for($tree = 0; $tree < count($usages); ++$tree) {
 						$usage = $usages[$tree];
@@ -90,7 +90,7 @@ class EventListener implements Listener {
 								}
 								$aliasEnum = new CommandEnum(ucfirst($command->getName()) . "Aliases", $aliases);
 							}
-							$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($player->getPlayer()), $aliasEnum, []);
+							$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($networkSession->getPlayer()), $aliasEnum, []);
 							$pk->commandData[$command->getName()] = $data;
 							continue;
 						}
