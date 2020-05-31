@@ -34,7 +34,7 @@ class EventListener implements Listener {
 			return;
 		$pk->commandData = [];
 		foreach($this->plugin->getServer()->getCommandMap()->getCommands() as $name => $command) {
-			if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help")
+			if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help" or !$command->testPermissionSilent($event->getPlayer()))
 				continue;
 			if(in_array($command->getName(), array_keys($this->plugin->getManualOverrides()))) {
 				$data = $this->plugin->getManualOverrides()[$command->getName()];
