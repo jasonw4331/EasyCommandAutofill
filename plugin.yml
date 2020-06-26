@@ -5,5 +5,7 @@ api: 3.0.0
 mcpe-protocol:
  - 389
  - 390
+ #Added Protocol 407 for MCPE 1.16
+ - 407
 description: "A plugin which adds commands to the client's autofill by parsing usage messages"
 author: "jasonwynn10"
