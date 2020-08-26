@@ -6,5 +6,6 @@ mcpe-protocol:
  - 389
  - 390
  - 407
+ - 408
 description: "A plugin which adds commands to the client's autofill by parsing usage messages"
 author: "jasonwynn10"
