@@ -97,23 +97,7 @@ class EventListener implements Listener {
 				preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9|\/]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean|bool|player)?(?:\s*[>\]]?\s?)/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 				$argumentCount = count($matches[0])-1;
 				if($argumentCount < 0) {
-					$data = new CommandData();
-					$data->commandName = strtolower($command->getName()); //TODO: commands containing uppercase letters in the name crash 1.9.0 client
-					$data->commandDescription = $this->plugin->getServer()->getLanguage()->translateString($command->getDescription());
-					$data->flags = (int)in_array($command->getName(), $this->plugin->getDebugCommands());
-					$data->permission = (int)!$command->testPermissionSilent($event->getPlayer());
-
-					$aliases = $command->getAliases();
-					if(count($aliases) > 0){
-						if(!in_array($data->commandName, $aliases, true)){
-							//work around a client bug which makes the original name not show when aliases are used
-							$aliases[] = $data->commandName;
-						}
-						$data->aliases = new CommandEnum();
-						$data->aliases->enumName = ucfirst($command->getName()) . "Aliases";
-						$data->aliases->enumValues = $aliases;
-					}
-					$pk->commandData[$command->getName()] = $data;
+					$data->overloads[$tree] = [];
 					continue;
 				}
 				for($argNumber = 0; $argNumber <= $argumentCount; ++$argNumber) {
