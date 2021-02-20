@@ -22,7 +22,7 @@ class Main extends PluginBase{
 	/** @var CommandEnumConstraint[] $enumConstraints */
 	protected $enumConstraints = [];
 
-	public function onEnable() {
+	public function onEnable() : void {
 		new EventListener($this);
 		if($this->getConfig()->get("Highlight-Debug", true))
 			$this->debugCommands = ["dumpmemory", "gc", "timings", "status"];
