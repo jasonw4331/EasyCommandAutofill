@@ -12,15 +12,15 @@ use pocketmine\plugin\PluginBase;
 
 class Main extends PluginBase{
 	/** @var CommandData[] $manualOverrides */
-	protected $manualOverrides = [];
+	protected array $manualOverrides = [];
 	/** @var string[] $debugCommands */
-	protected $debugCommands = [];
+	protected array $debugCommands = [];
 	/** @var CommandEnum[] $hardcodedEnums */
-	protected $hardcodedEnums = [];
+	protected array $hardcodedEnums = [];
 	/** @var CommandEnum[] $softEnums */
-	protected $softEnums = [];
+	protected array $softEnums = [];
 	/** @var CommandEnumConstraint[] $enumConstraints */
-	protected $enumConstraints = [];
+	protected array $enumConstraints = [];
 
 	public function onEnable() {
 		new EventListener($this);
