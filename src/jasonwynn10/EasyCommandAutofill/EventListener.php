@@ -136,6 +136,7 @@ class EventListener implements Listener {
 								"json" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_JSON,
 								"command" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_COMMAND,
 								"boolean", "bool", "mixed" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_VALUE,
+								"postfix" => AvailableCommandsPacket::ARG_FLAG_POSTFIX,
 								default => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT,
 							};
 						}
