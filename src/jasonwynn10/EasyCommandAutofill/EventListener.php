@@ -11,8 +11,7 @@ use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\Server;
 
 class EventListener implements Listener {
-	/** @var Main $plugin */
-	protected $plugin;
+	protected Main $plugin;
 
 	/**
 	 * EventListener constructor.
@@ -26,22 +25,22 @@ class EventListener implements Listener {
 
 	/**
 	 * @param DataPacketSendEvent $event
-	 * @priority HIGH
+	 * @priority HIGHEST
 	 */
-	public function onDataPacketSend(DataPacketSendEvent $event) {
+	public function onDataPacketSend(DataPacketSendEvent $event) : void {
 		$packets = $event->getPackets();
 		foreach($packets as $pk) {
 			if(!$pk instanceof AvailableCommandsPacket)
 				return;
 			foreach($event->getTargets() as $networkSession) {
 				$pk->commandData = [];
-				foreach($this->plugin->getServer()->getCommandMap()->getCommands() as $name => $command) {
+				foreach($this->plugin->getServer()->getCommandMap()->getCommands() as $command) {
 					if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help" or !$command->testPermissionSilent($networkSession->getPlayer()))
 						continue;
 					if(in_array($command->getName(), array_keys($this->plugin->getManualOverrides()))) {
 						$data = $this->plugin->getManualOverrides()[$command->getName()];
 						$data->flags = $data->flags ?? 0;
-						$data->permission = (int)!$command->testPermissionSilent($networkSession->getPlayer());
+						$data->permission = $command->testPermissionSilent($networkSession->getPlayer()) ? 0 : 1;
 						if(!$data->aliases instanceof CommandEnum) {
 							$aliases = $command->getAliases();
 							if(count($aliases) > 0){
@@ -56,7 +55,7 @@ class EventListener implements Listener {
 						continue;
 					}
 					$usage = $this->plugin->getServer()->getLanguage()->translateString($command->getUsage());
-					if(empty($usage) or $usage[0] === '%') {
+					if($usage === '' or $usage[0] === '%') {
 						$aliasEnum = null;
 						$aliases = $command->getAliases();
 						if(count($aliases) > 0){
@@ -68,12 +67,12 @@ class EventListener implements Listener {
 						}
 						$overloads = [];
 						$overloads[0][0] = CommandParameter::standard("args", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, true);
-						$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($networkSession->getPlayer()), $aliasEnum, $overloads);
+						$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), $command->testPermissionSilent($networkSession->getPlayer()) ? 0 : 1, $aliasEnum, $overloads);
 						$pk->commandData[$command->getName()] = $data;
 						continue;
 					}
 					$usages = explode(" OR ", $usage); // split command trees
-					$data = new CommandData(strtolower($command->getName()), Server::getInstance()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($networkSession->getPlayer()), null, []);
+					$data = new CommandData(strtolower($command->getName()), Server::getInstance()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), $command->testPermissionSilent($networkSession->getPlayer()) ? 0 : 1, null, []);
 					$enumCount = 0;
 					for($tree = 0; $tree < count($usages); ++$tree) {
 						$usage = $usages[$tree];
@@ -90,70 +89,47 @@ class EventListener implements Listener {
 								}
 								$aliasEnum = new CommandEnum(ucfirst($command->getName()) . "Aliases", $aliases);
 							}
-							$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), (int)!$command->testPermissionSilent($networkSession->getPlayer()), $aliasEnum, []);
+							$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), $command->testPermissionSilent($networkSession->getPlayer()) ? 0 : 1, $aliasEnum, []);
 							$pk->commandData[$command->getName()] = $data;
 							continue;
 						}
 						for($argNumber = 0; $argNumber <= $argumentCount; ++$argNumber) {
-							if(empty($matches[1][$argNumber]) or $matches[1][$argNumber] === " ") {
+							if(!isset($matches[1][$argNumber]) or $matches[1][$argNumber] === " ") {
 								$data->overloads[$tree][$argNumber] = CommandParameter::enum(strtolower($matches[2][$argNumber]), $enum = new CommandEnum(strtolower($matches[2][$argNumber]), [strtolower($matches[2][$argNumber])]), 1, false);
 								$pk->hardcodedEnums[] = $enum;
 								continue;
 							}
-							$optional = strpos($matches[1][$argNumber], '[') !== false;
+							$optional = str_contains($matches[1][$argNumber], '[');
 							$paramName = strtolower($matches[2][$argNumber]);
-							if(stripos($paramName, "|") === false and stripos($paramName, "/") === false) {
-								if(empty($matches[3][$argNumber]) and $this->plugin->getConfig()->get("Parse-with-Parameter-Names", true)) {
-									if(stripos($paramName, "player") !== false or stripos($paramName, "target") !== false) {
-										$paramType = AvailableCommandsPacket::ARG_TYPE_TARGET;
-									}elseif(stripos($paramName, "count") !== false) {
-										$paramType = AvailableCommandsPacket::ARG_TYPE_INT;
+							if(str_contains($paramName, "|") and str_contains($paramName, "/")) {
+								if(!isset($matches[3][$argNumber]) and $this->plugin->getConfig()->get("Parse-with-Parameter-Names", true) === true) {
+									if(str_contains($paramName, "player") or str_contains($paramName, "target")) {
+										$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
+									}elseif(str_contains($paramName, "count")) {
+										$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
 									}else{
-										$paramType = AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
+										$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
 									}
 								}else{
-									switch(strtolower($matches[3][$argNumber])) {
-										case "string":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_STRING;
-										break;
-										case "int":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_INT;
-										break;
-										case "x y z":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_POSITION;
-										break;
-										case "float":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_FLOAT;
-										break;
-										case "player":
-										case "target":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_TARGET;
-										break;
-										case "message":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_MESSAGE;
-										break;
-										case "json":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_JSON;
-										break;
-										case "command":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_COMMAND;
-										break;
-										case "boolean":
-										case "bool":
-										case "mixed":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_VALUE;
-										break;
-										default:
-										case "text":
-											$paramType = AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-										break;
-									}
+									$paramType = match (strtolower($matches[3][$argNumber])) {
+										"string" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_STRING,
+										"int" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT,
+										"x y z" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_POSITION,
+										"float" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_FLOAT,
+										"player", "target" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET,
+										"message" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_MESSAGE,
+										"json" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_JSON,
+										"command" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_COMMAND,
+										"boolean", "bool", "mixed" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_VALUE,
+										"postfix" => AvailableCommandsPacket::ARG_FLAG_POSTFIX,
+										default => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT,
+									};
 								}
 								$data->overloads[$tree][$argNumber] = CommandParameter::standard($paramName, $paramType, 0, $optional);
-							}elseif(stripos($paramName, "|") !== false){
+							}elseif(str_contains($paramName, "|")){
 								++$enumCount;
 								$enumValues = explode("|", $paramName);
-								$data->overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum = $enum = new CommandEnum($data->getName()." Enum#".$enumCount, $enumValues), 1, $optional);
+								$data->overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum = new CommandEnum($data->getName()." Enum#".$enumCount, $enumValues), 1, $optional);
 								$pk->softEnums[] = $enum;
 							}else{
 								++$enumCount;
