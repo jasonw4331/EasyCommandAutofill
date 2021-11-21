@@ -2,12 +2,5 @@ name: EasyCommandAutofill
 main: jasonwynn10\EasyCommandAutofill\Main
 version: 2.0.0
 api: 4.0.0
-mcpe-protocol:
- - 389
- - 390
- - 407
- - 422
- - 440
- - 448
 description: "A plugin which adds commands to the client's autofill by parsing usage messages"
 author: "jasonwynn10"
