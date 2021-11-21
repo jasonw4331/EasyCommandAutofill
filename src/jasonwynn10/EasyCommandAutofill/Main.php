@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace jasonwynn10\EasyCommandAutofill;
 
+use pocketmine\lang\Translatable;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
@@ -29,7 +30,8 @@ class Main extends PluginBase{
 		$map = $this->getServer()->getCommandMap();
 
 		$command = $map->getCommand("difficulty");
-		$this->addManualOverride("difficulty", new CommandData($command->getName(), $this->getServer()->getLanguage()->translateString($command->getDescription()), 0, 1, null, [0 => [CommandParameter::standard("new difficulty", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, false)]]));
+		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
+		$this->addManualOverride("difficulty", new CommandData($command->getName(), $this->getServer()->getLanguage()->translateString($description), 0, 1, null, [0 => [CommandParameter::standard("new difficulty", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, false)]]));
 
 		/*
 		$data = new CommandData();
