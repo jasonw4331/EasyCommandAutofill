@@ -101,28 +101,29 @@ class EventListener implements Listener {
 							}
 							$optional = str_contains($matches[1][$argNumber], '[');
 							$paramName = strtolower($matches[2][$argNumber]);
-							if(str_contains($paramName, "|") and str_contains($paramName, "/")) {
+							if(!str_contains($paramName, "|") and str_contains($paramName, "/")) {
 								if(!isset($matches[3][$argNumber]) and $this->plugin->getConfig()->get("Parse-with-Parameter-Names", true) === true) {
 									if(str_contains($paramName, "player") or str_contains($paramName, "target")) {
-										$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
+										$paramType = AvailableCommandsPacket::ARG_TYPE_TARGET;
 									}elseif(str_contains($paramName, "count")) {
-										$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
+										$paramType = AvailableCommandsPacket::ARG_TYPE_INT;
+									}elseif(str_contains($paramName, "block")) {
+										$paramType = AvailableCommandsPacket::ARG_TYPE_INT;
 									}else{
-										$paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
+										$paramType = AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
 									}
 								}else{
 									$paramType = match (strtolower($matches[3][$argNumber])) {
-										"string" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_STRING,
-										"int" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT,
-										"x y z" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_POSITION,
-										"float" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_FLOAT,
-										"player", "target" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET,
-										"message" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_MESSAGE,
-										"json" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_JSON,
-										"command" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_COMMAND,
-										"boolean", "bool", "mixed" => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_VALUE,
-										"postfix" => AvailableCommandsPacket::ARG_FLAG_POSTFIX,
-										default => AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT,
+										"string" => AvailableCommandsPacket::ARG_TYPE_STRING,
+										"int" => AvailableCommandsPacket::ARG_TYPE_INT,
+										"x y z" => AvailableCommandsPacket::ARG_TYPE_POSITION,
+										"float" => AvailableCommandsPacket::ARG_TYPE_FLOAT,
+										"player", "target" => AvailableCommandsPacket::ARG_TYPE_TARGET,
+										"message" => AvailableCommandsPacket::ARG_TYPE_MESSAGE,
+										"json" => AvailableCommandsPacket::ARG_TYPE_JSON,
+										"command" => AvailableCommandsPacket::ARG_TYPE_COMMAND,
+										"boolean", "bool", "mixed" => AvailableCommandsPacket::ARG_TYPE_VALUE,
+										default => AvailableCommandsPacket::ARG_TYPE_RAWTEXT,
 									};
 								}
 								$data->overloads[$tree][$argNumber] = CommandParameter::standard($paramName, $paramType, 0, $optional);
