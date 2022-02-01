@@ -4,11 +4,11 @@ namespace jasonwynn10\EasyCommandAutofill;
 
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketSendEvent;
+use pocketmine\lang\Translatable;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
-use pocketmine\Server;
 
 class EventListener implements Listener {
 	protected Main $plugin;
@@ -54,7 +54,7 @@ class EventListener implements Listener {
 						$pk->commandData[$command->getName()] = $data;
 						continue;
 					}
-					$usage = $this->plugin->getServer()->getLanguage()->translateString($command->getUsage());
+					$usage = $command->getUsage() instanceof Translatable ? $this->plugin->getServer()->getLanguage()->translate($command->getUsage()) : $this->plugin->getServer()->getLanguage()->translateString($command->getUsage());
 					if($usage === '' or $usage[0] === '%') {
 						$aliasEnum = null;
 						$aliases = $command->getAliases();
@@ -72,12 +72,13 @@ class EventListener implements Listener {
 						continue;
 					}
 					$usages = explode(" OR ", $usage); // split command trees
-					$data = new CommandData(strtolower($command->getName()), Server::getInstance()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), $command->testPermissionSilent($networkSession->getPlayer()) ? 0 : 1, null, []);
+					$description = $command->getDescription() instanceof Translatable ? $this->plugin->getServer()->getLanguage()->translate($command->getDescription()) : $this->plugin->getServer()->getLanguage()->translateString($command->getDescription());
+					$data = new CommandData(strtolower($command->getName()), $description, (int)in_array($command->getName(), $this->plugin->getDebugCommands()), $command->testPermissionSilent($networkSession->getPlayer()) ? 0 : 1, null, []);
 					$enumCount = 0;
 					for($tree = 0; $tree < count($usages); ++$tree) {
 						$usage = $usages[$tree];
 						$commandString = explode(" ", $usage)[0];
-						preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9|\/]+)(?:\s*:?\s*)(string|int|x y z|float|mixed|target|message|text|json|command|boolean|bool|player)?(?:\s*[>\]]?\s?)/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
+						preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9|\/]+)\s*:?\s*(string|int|x y z|float|mixed|target|message|text|json|command|boolean|bool|player)?\s*[>\]]?\s?/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 						$argumentCount = count($matches[0])-1;
 						if($argumentCount < 0) {
 							$aliasEnum = null;
@@ -89,7 +90,7 @@ class EventListener implements Listener {
 								}
 								$aliasEnum = new CommandEnum(ucfirst($command->getName()) . "Aliases", $aliases);
 							}
-							$data = new CommandData(strtolower($command->getName()), $this->plugin->getServer()->getLanguage()->translateString($command->getDescription()), (int)in_array($command->getName(), $this->plugin->getDebugCommands()), $command->testPermissionSilent($networkSession->getPlayer()) ? 0 : 1, $aliasEnum, []);
+							$data = new CommandData(strtolower($command->getName()), $description, (int)in_array($command->getName(), $this->plugin->getDebugCommands()), $command->testPermissionSilent($networkSession->getPlayer()) ? 0 : 1, $aliasEnum, []);
 							$pk->commandData[$command->getName()] = $data;
 							continue;
 						}
