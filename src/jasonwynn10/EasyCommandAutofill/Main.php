@@ -29,171 +29,170 @@ class Main extends PluginBase{
 			$this->debugCommands = ["dumpmemory", "gc", "timings", "status"];
 		$map = $this->getServer()->getCommandMap();
 
-		$command = $map->getCommand("difficulty");
+		$command = $map->getCommand("pocketmine:difficulty");
 		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
-		$this->addManualOverride("difficulty", new CommandData($command->getName(), $this->getServer()->getLanguage()->translateString($description), 0, 1, null, [0 => [CommandParameter::standard("new difficulty", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, false)]]));
+		$this->addManualOverride("pocketmine:difficulty",
+			new CommandData(
+				$command->getName(),
+				$description,
+				0,
+				1,
+				null,
+				[
+					[
+						CommandParameter::standard("new difficulty", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, false)
+					],
+				]
+			)
+		);
 
-		/*
-		$data = new CommandData();
-		$param = new CommandParameter();
-		$param->paramName = "player";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = false;
-		$data->overloads[0] = [$param];
-		$param = new CommandParameter();
-		$param->paramName = "item";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-		$param->isOptional = false;
-		$data->overloads[0][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "amount";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
-		$param->isOptional = true;
-		$data->overloads[0][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "tags";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_JSON;
-		$param->isOptional = true;
-		$data->overloads[0][] = $param;
-		$this->addManualOverride("give", $data);
+		$command = $map->getCommand("pocketmine:give");
+		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
+		$this->addManualOverride("pocketmine:give",
+			new CommandData(
+				$command->getName(),
+				$description,
+				0, // no flags
+				1, // default no permission
+				null,
+				[
+					[
+						CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),
+						CommandParameter::standard("item", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, false),
+						CommandParameter::standard("amount", AvailableCommandsPacket::ARG_TYPE_INT, 0, true),
+						CommandParameter::standard("tags", AvailableCommandsPacket::ARG_TYPE_JSON, 0, true)
+					]
+				]
+			)
+		);
 
-		$data = new CommandData();
-		$param = new CommandParameter();
-		$param->paramName = "position";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_POSITION;
-		$param->isOptional = true;
-		$data->overloads[0] = [$param];
-		$this->addManualOverride("setworldspawn", $data);
+		$command = $map->getCommand("pocketmine:setworldspawn");
+		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
+		$this->addManualOverride("pocketmine:setworldspawn",
+			new CommandData(
+				$command->getName(),
+				$description,
+				0, // no flags
+				1, // default no permission
+				null,
+				[
+					[
+						CommandParameter::standard("position", AvailableCommandsPacket::ARG_TYPE_POSITION, 0, false)
+					]
+				]
+			)
+		);
 
-		$data = new CommandData();
-		$param = new CommandParameter();
-		$param->paramName = "player";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = true;
-		$data->overloads[0] = [$param];
-		$param = new CommandParameter();
-		$param->paramName = "position";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_POSITION;
-		$param->isOptional = true;
-		$data->overloads[0][] = $param;
-		$this->addManualOverride("spawnpoint", $data);
+		$command = $map->getCommand("pocketmine:setworldspawn");
+		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
+		$this->addManualOverride("pocketmine:setworldspawn",
+			new CommandData(
+				$command->getName(),
+				$description,
+				0, // no flags
+				1, // default no permission
+				null,
+				[
+					[
+						CommandParameter::standard("position", AvailableCommandsPacket::ARG_TYPE_POSITION, 0, true)
+					]
+				]
+			)
+		);
 
-		$data = new CommandData();
-		$param = new CommandParameter();
-		$param->paramName = "victim";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = false;
-		$data->overloads[0] = [$param];
-		$param = new CommandParameter();
-		$param->paramName = "destination";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = true;
-		$data->overloads[0][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "victim";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = false;
-		$data->overloads[1] = [$param];
-		$param = new CommandParameter();
-		$param->paramName = "destination";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_POSITION;
-		$param->isOptional = true;
-		$data->overloads[1][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "x-rot";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_FLOAT;
-		$param->isOptional = true;
-		$data->overloads[1][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "y-rot";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_FLOAT;
-		$param->isOptional = true;
-		$data->overloads[1][] = $param;
-		$this->addManualOverride("teleport", $data);
+		$command = $map->getCommand("pocketmine:spawnpoint");
+		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
+		$this->addManualOverride("pocketmine:spawnpoint",
+			new CommandData(
+				$command->getName(),
+				$description,
+				0, // no flags
+				1, // default no permission
+				null,
+				[
+					[
+						CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, true),
+						CommandParameter::standard("position", AvailableCommandsPacket::ARG_TYPE_POSITION, 0, true)
+					]
+				]
+			)
+		);
 
-		$data = new CommandData();
-		$param = new CommandParameter();
-		$param->paramName = "player";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = false;
-		$data->overloads[0] = [$param];
-		$param = new CommandParameter();
-		$param->paramName = "title Enum #0";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_FLAG_ENUM | 0;
-		$param->isOptional = false;
-		$param->enum = new CommandEnum();
-		$param->enum->enumName = "title Enum #0";
-		$param->enum->enumValues = ["clear"];
-		$data->overloads[0][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "player";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = false;
-		$data->overloads[1] = [$param];
-		$param = new CommandParameter();
-		$param->paramName = "title Enum #1";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_FLAG_ENUM | 1;
-		$param->isOptional = false;
-		$param->enum = new CommandEnum();
-		$param->enum->enumName = "title Enum #1";
-		$param->enum->enumValues = ["reset"];
-		$data->overloads[1][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "player";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = false;
-		$data->overloads[2] = [$param];
-		$param = new CommandParameter();
-		$param->paramName = "title Enum #2";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_FLAG_ENUM | 2;
-		$param->isOptional = false;
-		$param->enum = new CommandEnum();
-		$param->enum->enumName = "title Enum #2";
-		$param->enum->enumValues = ["title", "subtitle", "actionbar"];
-		$data->overloads[2][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "titleText";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_MESSAGE;
-		$param->isOptional = false;
-		$data->overloads[2][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "player";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_TARGET;
-		$param->isOptional = false;
-		$data->overloads[3] = [$param];
-		$param = new CommandParameter();
-		$param->paramName = "title Enum #3";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_FLAG_ENUM | 3;
-		$param->isOptional = false;
-		$param->enum = new CommandEnum();
-		$param->enum->enumName = "title Enum #3";
-		$param->enum->enumValues = ["times"];
-		$data->overloads[3][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "fadeIn";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
-		$param->isOptional = false;
-		$data->overloads[3][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "stay";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
-		$param->isOptional = false;
-		$data->overloads[3][] = $param;
-		$param = new CommandParameter();
-		$param->paramName = "fadeOut";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_INT;
-		$param->isOptional = false;
-		$data->overloads[3][] = $param;
-		$this->addManualOverride("title", $data);
+		$command = $map->getCommand("pocketmine:teleport");
+		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
+		$this->addManualOverride("pocketmine:teleport",
+			new CommandData(
+				$command->getName(),
+				$description,
+				0, // no flags
+				1, // default no permission
+				null,
+				[
+					[
+						CommandParameter::standard("victim", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),
+						CommandParameter::standard("destination", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, true),
+					],
+					[
+						CommandParameter::standard("victim", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),
+						CommandParameter::standard("destination", AvailableCommandsPacket::ARG_TYPE_POSITION, 0, true),
+						CommandParameter::standard("x-rot", AvailableCommandsPacket::ARG_TYPE_FLOAT, 0, true),
+						CommandParameter::standard("y-rot", AvailableCommandsPacket::ARG_TYPE_FLOAT, 0, true),
+					]
+				]
+			)
+		);
 
-		$data = new CommandData();
-		$param = new CommandParameter();
-		$param->paramName = "plugin name";
-		$param->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-		$param->isOptional = true;
-		$data->overloads[0] = [$param];
-		$this->addManualOverride("version", $data);
-		*/
+		$command = $map->getCommand("pocketmine:title");
+		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
+		$this->addManualOverride("pocketmine:title",
+			new CommandData(
+				$command->getName(),
+				$description,
+				0, // no flags
+				1, // default no permission
+				null,
+				[
+					[
+						CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),
+						CommandParameter::enum("title Enum #0", new CommandEnum('title Enum #0', ['clear']), 0, false),
+					],
+					[
+						CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),
+						CommandParameter::enum("title Enum #1", new CommandEnum('title Enum #1', ['reset']), 0, false),
+					],
+					[
+						CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),
+						CommandParameter::enum("title Enum #2", new CommandEnum('title Enum #2', ['title', 'subtitle', 'actionbar']), 0, false),
+						CommandParameter::standard("titleText", AvailableCommandsPacket::ARG_TYPE_MESSAGE, 0, false),
+					],
+					[
+						CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),
+						CommandParameter::enum("title Enum #3", new CommandEnum('title Enum #3', ['times']), 0, false),
+						CommandParameter::standard("fadeIn", AvailableCommandsPacket::ARG_TYPE_INT, 0, false),
+						CommandParameter::standard("titleText", AvailableCommandsPacket::ARG_TYPE_INT, 0, false),
+						CommandParameter::standard("stay", AvailableCommandsPacket::ARG_TYPE_INT, 0, false),
+						CommandParameter::standard("fadeOut", AvailableCommandsPacket::ARG_TYPE_INT, 0, false),
+					]
+				]
+			)
+		);
+
+		$command = $map->getCommand("pocketmine:version");
+		$description = $command->getDescription() instanceof Translatable ? $command->getDescription()->getText() : $command->getDescription();
+		$this->addManualOverride("pocketmine:version",
+			new CommandData(
+				$command->getName(),
+				$description,
+				0, // no flags
+				1, // default no permission
+				null,
+				[
+					[
+						CommandParameter::standard("plugin name", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, true),
+					],
+				]
+			)
+		);
 	}
 
 	/**
