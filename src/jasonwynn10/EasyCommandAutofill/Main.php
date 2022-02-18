@@ -609,12 +609,9 @@ class Main extends PluginBase{
 	}
 
 	public function addSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self {
-		foreach($this->hardcodedEnums as $hardcodedEnum)
-			if($enum->getName() === $hardcodedEnum->getName())
-				throw new \InvalidArgumentException("Enum is already in hardcoded enum list.");
-		foreach($this->softEnums as $softEnums)
-			if($enum->getName() === $softEnums->getName())
-				throw new \InvalidArgumentException("Enum is already in soft enums list.");
+		foreach(array_merge($this->softEnums, $this->hardcodedEnums) as $enum2)
+			if($enum->getName() === $enum2->getName())
+				throw new \InvalidArgumentException("Enum is already in an enum list.");
 		$this->softEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
@@ -625,10 +622,7 @@ class Main extends PluginBase{
 	}
 
 	public function updateSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self {
-		foreach($this->hardcodedEnums as $hardcodedEnum)
-			if($enum->getName() === $hardcodedEnum->getName())
-				throw new \InvalidArgumentException("Enum is already in hardcoded enum list.");
-		if(in_array($enum->getName(), array_keys($this->softEnums), true))
+		if(!in_array($enum->getName(), array_keys($this->softEnums), true))
 			throw new \InvalidArgumentException("Enum is not in soft enum list.");
 		$this->softEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
