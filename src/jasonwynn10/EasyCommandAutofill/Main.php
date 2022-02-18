@@ -603,11 +603,6 @@ class Main extends PluginBase{
 		return $this;
 	}
 
-	/**
-	 * @param CommandEnumConstraint $enumConstraint
-	 *
-	 * @return Main
-	 */
 	public function addEnumConstraint(CommandEnumConstraint $enumConstraint) : self {
 		foreach($this->hardcodedEnums as $hardcodedEnum)
 			if($enumConstraint->getEnum()->getName() === $hardcodedEnum->getName()) {
