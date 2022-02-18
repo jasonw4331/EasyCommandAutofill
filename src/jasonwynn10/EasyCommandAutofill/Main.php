@@ -347,7 +347,6 @@ class Main extends PluginBase{
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
 		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/whitelist <add|remove|on|off|list|reload> [player: target]'));
-
 	}
 
 	public function onDataPacketSend(DataPacketSendEvent $event) : void {
@@ -469,7 +468,7 @@ class Main extends PluginBase{
 		return new CommandData(strtolower($name), $description, (int) in_array($name, $this->getDebugCommands()), $hasPermission, $this->generateAliasEnum($name, $aliases), $overloads);
 	}
 
-	private function generateAliasEnum(string $name, array $aliases) : ?CommandEnum{
+	private function generateAliasEnum(string $name, array $aliases) : ?CommandEnum {
 		if(count($aliases) > 0){
 			if(!in_array($name, $aliases, true)){
 				//work around a client bug which makes the original name not show when aliases are used
@@ -480,7 +479,7 @@ class Main extends PluginBase{
 		return null;
 	}
 
-	private function generatePocketMineDefaultCommandData(string $name, array $aliases, string $description) : CommandData{
+	private function generatePocketMineDefaultCommandData(string $name, array $aliases, string $description) : CommandData {
 		return new CommandData(
 			strtolower($name),
 			$description,
