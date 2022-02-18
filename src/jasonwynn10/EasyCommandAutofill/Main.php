@@ -80,13 +80,15 @@ class Main extends PluginBase{
 		$this->addSoftEnum(new CommandEnum('Effect', StringToEffectParser::getInstance()->getKnownAliases()), false);
 		$this->addSoftEnum(new CommandEnum('Enchant', StringToEnchantmentParser::getInstance()->getKnownAliases()), false);
 		$this->addSoftEnum(new CommandEnum('Enchantment', StringToEnchantmentParser::getInstance()->getKnownAliases()), false); // proper english word
-		$this->addSoftEnum(new CommandEnum('Item', StringToItemParser::getInstance()->getKnownAliases()), false);
+		$itemOptions = StringToItemParser::getInstance()->getKnownAliases();
+		$itemOptions = array_filter($itemOptions, fn(string $itemName) => str_starts_with($itemName, 'minecraft:'));
+		$this->addSoftEnum(new CommandEnum('Item', $itemOptions), false);
 
 		$blocks = [];
-		foreach(StringToItemParser::getInstance()->getKnownAliases() as $alias) {
+		foreach($itemOptions as $alias) {
 			$item = StringToItemParser::getInstance()->parse($alias);
 			if($item instanceof ItemBlock)
-				$blocks[] = $item->getBlock()->getName();
+				$blocks[] = $alias;
 		}
 		$this->addSoftEnum(new CommandEnum('Block', $blocks), false);
 	}
@@ -133,7 +135,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/defaultgamemode <survival|creative|adventure|spectator>'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/defaultgamemode <gameMode: GameMode>'));
 
 		$commandName = 'pocketmine:deop';
 		$command = $map->getCommand($commandName);
@@ -149,7 +151,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/difficulty <peaceful|easy|normal|hard>'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/difficulty <difficulty: Difficulty>'));
 
 		$commandName = 'pocketmine:dumpmemory';
 		$command = $map->getCommand($commandName);
@@ -165,7 +167,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/effect <player: target> <effect: string> [duration: int] [amplifier: int] [hideParticles: bool]'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/effect <player: target> <effect: Effect> [duration: int] [amplifier: int] [hideParticles: Boolean]'));
 
 		$commandName = 'pocketmine:enchant';
 		$command = $map->getCommand($commandName);
@@ -173,7 +175,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/enchant <player: target> <enchantment: string> [level: int]'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/enchant <player: target> <enchantmentId: int> [level: int] OR /enchant <player: target> <enchantmentName: Enchant> [level: int]'));
 
 		$commandName = 'pocketmine:gamemode';
 		$command = $map->getCommand($commandName);
@@ -181,7 +183,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/gamemode <survival|creative|adventure|spectator> [player: target]'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/gamemode <gameMode: GameMode> [player: target]'));
 
 		$commandName = 'pocketmine:gc';
 		$command = $map->getCommand($commandName);
@@ -197,7 +199,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/give <player: target> <item: string> [amount: int] [data: json]'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/give <player: target> <item: Item> [amount: int] [data: json]'));
 
 		$commandName = 'pocketmine:kick';
 		$command = $map->getCommand($commandName);
@@ -357,7 +359,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/time <set|add|query> <time: int>'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/time add <amount: int> OR /time set <amount: int> OR /time set <time: TimeSpec> OR /time <start|stop|query>')); // TODO separate trees
 
 		$commandName = 'pocketmine:timings';
 		$command = $map->getCommand($commandName);
@@ -365,7 +367,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/timings <on|off|paste|reset|report>'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/timings <on|off|paste|reset|report>')); // TODO separate trees
 
 		$commandName = 'pocketmine:title';
 		$command = $map->getCommand($commandName);
@@ -474,13 +476,18 @@ class Main extends PluginBase{
 			$usage = $usages[$tree];
 			$overloads[$tree] = [];
 			$commandString = explode(" ", $usage)[0];
-			preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9|\/]+)\s*:?\s*(string|int|x y z|float|mixed|target|message|text|json|command|boolean|bool|player)?\s*[>\]]?\s?/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
+			preg_match_all('/\h*([<\[])?\h*([\w|]+)\h*:?\h*([\w\h]+)?\h*[>\]]?\h*/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString)); // https://regex101.com/r/1REoJG/22
 			$argumentCount = count($matches[0])-1;
 			for($argNumber = 0; $argumentCount >= 0 and $argNumber <= $argumentCount; ++$argNumber) {
-				if(!isset($matches[1][$argNumber]) or $matches[1][$argNumber] === " ") {
-					++$enumCount;
-					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, [strtolower($matches[2][$argNumber])]), false);
-					$overloads[$tree][$argNumber] = CommandParameter::enum($name . " Enum#" . $enumCount, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false);
+				if(!isset($matches[1][$argNumber])) {
+					$paramName = strtolower($matches[2][$argNumber]);
+					$softEnums = $this->getSoftEnums();
+					if(isset($softEnums[$paramName])) {
+						$enum = $softEnums[$paramName];
+					}else{
+						$this->addSoftEnum($enum = new CommandEnum($paramName, [$paramName]), false);
+					}
+					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false); // collapse and assume required because no optional identifier exists in usage message
 					continue;
 				}
 				$optional = str_contains($matches[1][$argNumber], '[');
@@ -603,7 +610,10 @@ class Main extends PluginBase{
 	public function addSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self {
 		foreach($this->hardcodedEnums as $hardcodedEnum)
 			if($enum->getName() === $hardcodedEnum->getName())
-				throw new \InvalidArgumentException("Soft enum is already in hardcoded enum list.");
+				throw new \InvalidArgumentException("Enum is already in hardcoded enum list.");
+		foreach($this->softEnums as $softEnums)
+			if($enum->getName() === $softEnums->getName())
+				throw new \InvalidArgumentException("Enum is already in soft enums list.");
 		$this->softEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
@@ -617,17 +627,12 @@ class Main extends PluginBase{
 		return $this;
 	}
 
-	/**
-	 * @return CommandEnum[]
-	 */
-	public function getSoftEnums() : array {
-		return $this->softEnums;
-	}
-
 	public function updateSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self {
 		foreach($this->hardcodedEnums as $hardcodedEnum)
 			if($enum->getName() === $hardcodedEnum->getName())
-				throw new \InvalidArgumentException("Soft enum is already in hardcoded enum list.");
+				throw new \InvalidArgumentException("Enum is already in hardcoded enum list.");
+		if(in_array($enum->getName(), array_keys($this->softEnums), true))
+			throw new \InvalidArgumentException("Enum is not in soft enum list.");
 		$this->softEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
@@ -653,6 +658,13 @@ class Main extends PluginBase{
 			$player->getNetworkSession()->sendDataPacket($pk);
 		}
 		return $this;
+	}
+
+	/**
+	 * @return CommandEnum[]
+	 */
+	public function getSoftEnums() : array {
+		return $this->softEnums;
 	}
 
 	public function addEnumConstraint(CommandEnumConstraint $enumConstraint) : self {
