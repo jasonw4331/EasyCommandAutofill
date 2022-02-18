@@ -36,7 +36,7 @@ class Main extends PluginBase{
 	protected $enumConstraints = [];
 
 	public function onEnable() : void {
-		$this->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, \Closure::fromCallable([$this, "onDataPacketSend"]), EventPriority::HIGHEST, $this, false);
+		$this->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, \Closure::fromCallable([$this, "onDataPacketSend"]), EventPriority::HIGH, $this, false);
 
 		if($this->getConfig()->get('Highlight Debugging Commands', false) !== false)
 			$this->debugCommands = ['dumpmemory', 'gc', 'timings', 'status'];
