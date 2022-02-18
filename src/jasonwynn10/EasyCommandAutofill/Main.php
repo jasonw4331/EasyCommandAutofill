@@ -618,13 +618,9 @@ class Main extends PluginBase{
 		$this->softEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
-		$pk = new UpdateSoftEnumPacket();
-		$pk->enumName = $enum->getName();
-		$pk->values = $enum->getValues();
-		$pk->type = UpdateSoftEnumPacket::TYPE_ADD;
-		foreach($this->getServer()->getOnlinePlayers() as $player) {
-			$player->getNetworkSession()->sendDataPacket($pk);
-		}
+		$pk = UpdateSoftEnumPacket::create($enum->getName(), $enum->getValues(), UpdateSoftEnumPacket::TYPE_ADD);
+		foreach($this->getServer()->getOnlinePlayers() as $player)
+			$player->getNetworkSession()->sendDataPacket($pk, false);
 		return $this;
 	}
 
@@ -637,13 +633,9 @@ class Main extends PluginBase{
 		$this->softEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
-		$pk = new UpdateSoftEnumPacket();
-		$pk->enumName = $enum->getName();
-		$pk->values = $enum->getValues();
-		$pk->type = UpdateSoftEnumPacket::TYPE_SET;
-		foreach($this->getServer()->getOnlinePlayers() as $player) {
-			$player->getNetworkSession()->sendDataPacket($pk);
-		}
+		$pk = UpdateSoftEnumPacket::create($enum->getName(), $enum->getValues(), UpdateSoftEnumPacket::TYPE_SET);
+		foreach($this->getServer()->getOnlinePlayers() as $player)
+			$player->getNetworkSession()->sendDataPacket($pk, false);
 		return $this;
 	}
 
@@ -651,13 +643,9 @@ class Main extends PluginBase{
 		unset($this->softEnums[strtolower($enum->getName())]);
 		if(!$sendPacket)
 			return $this;
-		$pk = new UpdateSoftEnumPacket();
-		$pk->enumName = $enum->getName();
-		$pk->values = $enum->getValues();
-		$pk->type = UpdateSoftEnumPacket::TYPE_REMOVE;
-		foreach($this->getServer()->getOnlinePlayers() as $player) {
-			$player->getNetworkSession()->sendDataPacket($pk);
-		}
+		$pk = UpdateSoftEnumPacket::create($enum->getName(), $enum->getValues(), UpdateSoftEnumPacket::TYPE_REMOVE);
+		foreach($this->getServer()->getOnlinePlayers() as $player)
+			$player->getNetworkSession()->sendDataPacket($pk, false);
 		return $this;
 	}
 
