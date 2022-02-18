@@ -7,6 +7,7 @@ use pocketmine\entity\effect\StringToEffectParser;
 use pocketmine\event\EventPriority;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\item\enchantment\StringToEnchantmentParser;
+use pocketmine\item\ItemBlock;
 use pocketmine\item\StringToItemParser;
 use pocketmine\lang\Translatable;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
@@ -80,6 +81,14 @@ class Main extends PluginBase{
 		$this->addSoftEnum(new CommandEnum('Enchant', StringToEnchantmentParser::getInstance()->getKnownAliases()), false);
 		$this->addSoftEnum(new CommandEnum('Enchantment', StringToEnchantmentParser::getInstance()->getKnownAliases()), false); // proper english word
 		$this->addSoftEnum(new CommandEnum('Item', StringToItemParser::getInstance()->getKnownAliases()), false);
+
+		$blocks = [];
+		foreach(StringToItemParser::getInstance()->getKnownAliases() as $alias) {
+			$item = StringToItemParser::getInstance()->parse($alias);
+			if($item instanceof ItemBlock)
+				$blocks[] = $item->getBlock()->getName();
+		}
+		$this->addSoftEnum(new CommandEnum('Block', $blocks), false);
 	}
 
 	private function setDefaultCommandData() : void {
