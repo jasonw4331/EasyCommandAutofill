@@ -494,6 +494,7 @@ class Main extends PluginBase{
 				$paramName = strtolower($matches[2][$argNumber]);
 				$paramType = strtolower($matches[3][$argNumber] ?? '');
 				if(in_array($paramType, array_keys(array_merge($this->softEnums, $this->hardcodedEnums)), true)) {
+					$paramType = $paramType === 'bool' ?  'Boolean' : $paramType;
 					$enum = $this->getSoftEnums()[$paramType] ?? $this->getHardcodedEnums()[$paramType];
 					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional);
 				}elseif(!str_contains($paramName, "|") and !str_contains($paramName, "/")) {
