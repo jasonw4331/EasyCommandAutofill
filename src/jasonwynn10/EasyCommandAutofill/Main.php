@@ -497,7 +497,17 @@ class Main extends PluginBase{
 					$paramType = $paramType === 'bool' ?  'Boolean' : $paramType;
 					$enum = $this->getSoftEnums()[$paramType] ?? $this->getHardcodedEnums()[$paramType];
 					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional);
-				}elseif(!str_contains($paramName, "|") and !str_contains($paramName, "/")) {
+				}elseif(str_contains($paramName, "|")) {
+					++$enumCount;
+					$enumValues = explode("|", $paramName);
+					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, $enumValues), false);
+					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
+				}elseif(str_contains($paramName, "/")) {
+					++$enumCount;
+					$enumValues = explode("/", $paramName);
+					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, $enumValues), false);
+					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
+				}else{
 					$paramType = match ($paramType) { // ordered by constant value
 						'int' => AvailableCommandsPacket::ARG_TYPE_INT,
 						'float' => AvailableCommandsPacket::ARG_TYPE_FLOAT,
@@ -511,16 +521,6 @@ class Main extends PluginBase{
 						'command' => AvailableCommandsPacket::ARG_TYPE_COMMAND,
 					};
 					$overloads[$tree][$argNumber] = CommandParameter::standard($paramName, $paramType, 0, $optional);
-				}elseif(str_contains($paramName, "|")) {
-					++$enumCount;
-					$enumValues = explode("|", $paramName);
-					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, $enumValues), false);
-					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
-				}elseif(str_contains($paramName, "/")) {
-					++$enumCount;
-					$enumValues = explode("/", $paramName);
-					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, $enumValues), false);
-					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
 				}
 			}
 		}
