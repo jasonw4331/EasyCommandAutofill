@@ -487,25 +487,22 @@ class Main extends PluginBase{
 					}else{
 						$this->addSoftEnum($enum = new CommandEnum($paramName, [$paramName]), false);
 					}
-					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false); // collapse and assume required because no optional identifier exists in usage message
+					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false); // collapse and assume required because no $optional identifier exists in usage message
 					continue;
 				}
 				$optional = str_contains($matches[1][$argNumber], '[');
 				$paramName = strtolower($matches[2][$argNumber]);
 				$paramType = strtolower($matches[3][$argNumber] ?? '');
 				if(in_array($paramType, array_keys(array_merge($this->softEnums, $this->hardcodedEnums)), true)) {
-					$paramType = $paramType === 'bool' ?  'Boolean' : $paramType;
 					$enum = $this->getSoftEnums()[$paramType] ?? $this->getHardcodedEnums()[$paramType];
-					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional);
+					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional); // do not collapse because there is an $optional identifier in usage message
 				}elseif(str_contains($paramName, "|")) {
-					++$enumCount;
 					$enumValues = explode("|", $paramName);
-					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, $enumValues), false);
+					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . ++$enumCount, $enumValues), false);
 					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
 				}elseif(str_contains($paramName, "/")) {
-					++$enumCount;
 					$enumValues = explode("/", $paramName);
-					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, $enumValues), false);
+					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . ++$enumCount, $enumValues), false);
 					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
 				}else{
 					$paramType = match ($paramType) { // ordered by constant value
@@ -558,9 +555,8 @@ class Main extends PluginBase{
 		$this->manualOverrides[$commandName] = $data;
 		if(!$sendPacket)
 			return $this;
-		foreach($this->getServer()->getOnlinePlayers() as $player) {
+		foreach($this->getServer()->getOnlinePlayers() as $player)
 			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
-		}
 		return $this;
 	}
 
@@ -575,9 +571,8 @@ class Main extends PluginBase{
 		$this->debugCommands[] = $commandName;
 		if(!$sendPacket)
 			return $this;
-		foreach($this->getServer()->getOnlinePlayers() as $player) {
+		foreach($this->getServer()->getOnlinePlayers() as $player)
 			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
-		}
 		return $this;
 	}
 
@@ -595,9 +590,8 @@ class Main extends PluginBase{
 		$this->hardcodedEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
-		foreach($this->getServer()->getOnlinePlayers() as $player) {
+		foreach($this->getServer()->getOnlinePlayers() as $player)
 			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
-		}
 		return $this;
 	}
 
