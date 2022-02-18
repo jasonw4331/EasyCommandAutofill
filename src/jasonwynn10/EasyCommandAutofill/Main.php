@@ -38,7 +38,7 @@ class Main extends PluginBase{
 	public function onEnable() : void {
 		$this->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, \Closure::fromCallable([$this, "onDataPacketSend"]), EventPriority::HIGHEST, $this, false);
 
-		if($this->getConfig()->get('Highlight Debugging Commands', true) !== false)
+		if($this->getConfig()->get('Highlight Debugging Commands', false) !== false)
 			$this->debugCommands = ['dumpmemory', 'gc', 'timings', 'status'];
 
 		if($this->getConfig()->get('Generate Default Enums', true) !== false)
@@ -476,46 +476,39 @@ class Main extends PluginBase{
 			$commandString = explode(" ", $usage)[0];
 			preg_match_all('/(\s?[<\[]?\s*)([a-zA-Z0-9|\/]+)\s*:?\s*(string|int|x y z|float|mixed|target|message|text|json|command|boolean|bool|player)?\s*[>\]]?\s?/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 			$argumentCount = count($matches[0])-1;
-			for($argNumber = 0; $argumentCount >= 0 and $argNumber <= $argumentCount; ++$argNumber){
-				if(!isset($matches[1][$argNumber]) or $matches[1][$argNumber] === " "){
-					$this->addHardcodedEnum($enum = new CommandEnum(strtolower($matches[2][$argNumber]), [strtolower($matches[2][$argNumber])]), false);
-					$overloads[$tree][$argNumber] = CommandParameter::enum(strtolower($matches[2][$argNumber]), $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false);
+			for($argNumber = 0; $argumentCount >= 0 and $argNumber <= $argumentCount; ++$argNumber) {
+				if(!isset($matches[1][$argNumber]) or $matches[1][$argNumber] === " ") {
+					++$enumCount;
+					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, [strtolower($matches[2][$argNumber])]), false);
+					$overloads[$tree][$argNumber] = CommandParameter::enum($name . " Enum#" . $enumCount, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false);
 					continue;
 				}
 				$optional = str_contains($matches[1][$argNumber], '[');
 				$paramName = strtolower($matches[2][$argNumber]);
-				if(!str_contains($paramName, "|") and !str_contains($paramName, "/")){
-					if(!isset($matches[3][$argNumber])){
-						if(str_contains($paramName, "player") or str_contains($paramName, "target")){
-							$paramType = AvailableCommandsPacket::ARG_TYPE_TARGET;
-						}elseif(str_contains($paramName, "count")){
-							$paramType = AvailableCommandsPacket::ARG_TYPE_INT;
-						}elseif(str_contains($paramName, "block")){
-							$paramType = AvailableCommandsPacket::ARG_TYPE_INT; // TODO: change to block names enum
-						}else{
-							$paramType = AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-						}
-					}else{
-						$paramType = match (strtolower($matches[3][$argNumber])) {
-							"string" => AvailableCommandsPacket::ARG_TYPE_STRING,
-							"int" => AvailableCommandsPacket::ARG_TYPE_INT,
-							"x y z" => AvailableCommandsPacket::ARG_TYPE_POSITION,
-							"float" => AvailableCommandsPacket::ARG_TYPE_FLOAT,
-							"player", "target" => AvailableCommandsPacket::ARG_TYPE_TARGET,
-							"message" => AvailableCommandsPacket::ARG_TYPE_MESSAGE,
-							"json" => AvailableCommandsPacket::ARG_TYPE_JSON,
-							"command" => AvailableCommandsPacket::ARG_TYPE_COMMAND,
-							"boolean", "bool", "mixed" => AvailableCommandsPacket::ARG_TYPE_VALUE,
-							default => AvailableCommandsPacket::ARG_TYPE_RAWTEXT,
-						};
-					}
+				$paramType = strtolower($matches[3][$argNumber] ?? '');
+				if(in_array($paramType, array_keys(array_merge($this->softEnums, $this->hardcodedEnums)), true)) {
+					$enum = $this->getSoftEnums()[$paramType] ?? $this->getHardcodedEnums()[$paramType];
+					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional);
+				}elseif(!str_contains($paramName, "|") and !str_contains($paramName, "/")) {
+					$paramType = match ($paramType) { // ordered by constant value
+						'int' => AvailableCommandsPacket::ARG_TYPE_INT,
+						'float' => AvailableCommandsPacket::ARG_TYPE_FLOAT,
+						'mixed' => AvailableCommandsPacket::ARG_TYPE_VALUE,
+						'player', 'target' => AvailableCommandsPacket::ARG_TYPE_TARGET,
+						'string' => AvailableCommandsPacket::ARG_TYPE_STRING,
+						'x y z' => AvailableCommandsPacket::ARG_TYPE_POSITION,
+						'message' => AvailableCommandsPacket::ARG_TYPE_MESSAGE,
+						default => AvailableCommandsPacket::ARG_TYPE_RAWTEXT,
+						'json' => AvailableCommandsPacket::ARG_TYPE_JSON,
+						'command' => AvailableCommandsPacket::ARG_TYPE_COMMAND,
+					};
 					$overloads[$tree][$argNumber] = CommandParameter::standard($paramName, $paramType, 0, $optional);
-				}elseif(str_contains($paramName, "|")){
+				}elseif(str_contains($paramName, "|")) {
 					++$enumCount;
 					$enumValues = explode("|", $paramName);
 					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, $enumValues), false);
 					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
-				}elseif(str_contains($paramName, "/")){
+				}elseif(str_contains($paramName, "/")) {
 					++$enumCount;
 					$enumValues = explode("/", $paramName);
 					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . $enumCount, $enumValues), false);
@@ -524,12 +517,12 @@ class Main extends PluginBase{
 			}
 		}
 		//$player->sendMessage($name.' is a fully generated command');
-		return new CommandData(strtolower($name), $description, (int) in_array($name, $this->getDebugCommands()), $hasPermission, $this->generateAliasEnum($name, $aliases), $overloads);
+		return new CommandData(strtolower($name), $description, (int) ($this->getConfig()->get('Highlight Debugging Commands', false) !== false and in_array($name, $this->debugCommands, true)), $hasPermission, $this->generateAliasEnum($name, $aliases), $overloads);
 	}
 
 	private function generateAliasEnum(string $name, array $aliases) : ?CommandEnum {
-		if(count($aliases) > 0){
-			if(!in_array($name, $aliases, true)){
+		if(count($aliases) > 0) {
+			if(!in_array($name, $aliases, true)) {
 				//work around a client bug which makes the original name not show when aliases are used
 				$aliases[] = $name;
 			}
@@ -591,7 +584,7 @@ class Main extends PluginBase{
 		foreach($this->softEnums as $softEnum)
 			if($enum->getName() === $softEnum->getName())
 				throw new \InvalidArgumentException("Hardcoded enum is already in soft enum list.");
-		$this->hardcodedEnums[$enum->getName()] = $enum;
+		$this->hardcodedEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
 		foreach($this->getServer()->getOnlinePlayers() as $player) {
@@ -611,7 +604,7 @@ class Main extends PluginBase{
 		foreach($this->hardcodedEnums as $hardcodedEnum)
 			if($enum->getName() === $hardcodedEnum->getName())
 				throw new \InvalidArgumentException("Soft enum is already in hardcoded enum list.");
-		$this->softEnums[$enum->getName()] = $enum;
+		$this->softEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
 		$pk = new UpdateSoftEnumPacket();
@@ -635,7 +628,7 @@ class Main extends PluginBase{
 		foreach($this->hardcodedEnums as $hardcodedEnum)
 			if($enum->getName() === $hardcodedEnum->getName())
 				throw new \InvalidArgumentException("Soft enum is already in hardcoded enum list.");
-		$this->softEnums[$enum->getName()] = $enum;
+		$this->softEnums[strtolower($enum->getName())] = $enum;
 		if(!$sendPacket)
 			return $this;
 		$pk = new UpdateSoftEnumPacket();
@@ -649,7 +642,7 @@ class Main extends PluginBase{
 	}
 
 	public function removeSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self {
-		unset($this->softEnums[$enum->getName()]);
+		unset($this->softEnums[strtolower($enum->getName())]);
 		if(!$sendPacket)
 			return $this;
 		$pk = new UpdateSoftEnumPacket();
