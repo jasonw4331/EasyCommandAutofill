@@ -3,18 +3,24 @@ declare(strict_types=1);
 namespace jasonwynn10\EasyCommandAutofill;
 
 use pocketmine\command\Command;
+use pocketmine\entity\effect\StringToEffectParser;
 use pocketmine\event\EventPriority;
 use pocketmine\event\server\DataPacketSendEvent;
+use pocketmine\item\enchantment\StringToEnchantmentParser;
+use pocketmine\item\StringToItemParser;
 use pocketmine\lang\Translatable;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnumConstraint;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
+use pocketmine\network\mcpe\protocol\types\LevelEvent;
+use pocketmine\network\mcpe\protocol\types\ParticleIds;
 use pocketmine\network\mcpe\protocol\UpdateSoftEnumPacket;
 use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
+use pocketmine\world\World;
 
 class Main extends PluginBase{
 	/** @var CommandData[] $manualOverrides */
@@ -31,8 +37,52 @@ class Main extends PluginBase{
 	public function onEnable() : void {
 		$this->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, \Closure::fromCallable([$this, "onDataPacketSend"]), EventPriority::HIGHEST, $this, false);
 
-		if($this->getConfig()->get("Highlight-Debug", true))
-			$this->debugCommands = ["dumpmemory", "gc", "timings", "status"];
+		if($this->getConfig()->get('Highlight Debugging Commands', true) !== false)
+			$this->debugCommands = ['dumpmemory', 'gc', 'timings', 'status'];
+
+		if($this->getConfig()->get('Generate Default Enums', true) !== false)
+			$this->setDefaultEnumData();
+
+		if($this->getConfig()->get('Generate PocketMine Command Autofill', true) !== false)
+			$this->setDefaultCommandData();
+	}
+
+	private function setDefaultEnumData() : void {
+		$worldConstants = array_keys((new \ReflectionClass(World::class))->getConstants());
+		$levelEventConstants = array_keys((new \ReflectionClass(LevelEvent::class))->getConstants());
+
+		$this->addHardcodedEnum(new CommandEnum('Boolean', ['true', 'false']), false);
+
+		$difficultyOptions = array_filter($worldConstants, fn(string $constant) => str_starts_with($constant, 'DIFFICULTY_'));
+		$difficultyOptions = array_merge($difficultyOptions, array_map(fn(string $difficultyString) => $difficultyString[0], $difficultyOptions));
+		$difficultyOptions = array_map(fn(string $option) => strtolower($option), $difficultyOptions);
+		$this->addHardcodedEnum(new CommandEnum('Difficulty', $difficultyOptions), false);
+
+		$gamemodeOptions = array_map(fn(GameMode $gamemode) => $gamemode->name(), GameMode::getAll());
+		$gamemodeOptions = array_merge($gamemodeOptions, array_map(fn(string $gameModeString) => $gameModeString[0], $gamemodeOptions));
+		$gamemodeOptions = array_map(fn(string $option) => strtolower($option), $gamemodeOptions);
+		$this->addHardcodedEnum(new CommandEnum('GameMode', $gamemodeOptions), false); // TODO: change to translated name
+
+		$particleOptions = array_filter($levelEventConstants, fn(string $constant) => str_starts_with($constant, 'PARTICLE_'));
+		$particleOptions = array_merge($particleOptions, array_keys((new \ReflectionClass(ParticleIds::class))->getConstants()));
+		$particleOptions = array_map(fn(string $particleName) => strtolower($particleName), $particleOptions);
+		$this->addHardcodedEnum(new CommandEnum('Particle', $particleOptions), false);
+
+		$soundOptions = array_filter($levelEventConstants, fn(string $constant) => str_starts_with($constant, 'SOUND_'));
+		$soundOptions = array_map(fn(string $particleName) => strtolower($particleName), $soundOptions);
+		$this->addHardcodedEnum(new CommandEnum('Sound', $soundOptions), false);
+
+		$timeSpecOptions = array_filter($worldConstants, fn(string $constant) => str_starts_with($constant, 'TIME_'));
+		$timeSpecOptions = array_map(fn(string $option) => strtolower($option), $timeSpecOptions);
+		$this->addHardcodedEnum(new CommandEnum('TimeSpec', $timeSpecOptions), false);
+
+		$this->addSoftEnum(new CommandEnum('Effect', StringToEffectParser::getInstance()->getKnownAliases()), false);
+		$this->addSoftEnum(new CommandEnum('Enchant', StringToEnchantmentParser::getInstance()->getKnownAliases()), false);
+		$this->addSoftEnum(new CommandEnum('Enchantment', StringToEnchantmentParser::getInstance()->getKnownAliases()), false); // proper english word
+		$this->addSoftEnum(new CommandEnum('Item', StringToItemParser::getInstance()->getKnownAliases()), false);
+	}
+
+	private function setDefaultCommandData() : void {
 		$map = $this->getServer()->getCommandMap();
 		$language = $this->getServer()->getLanguage();
 
@@ -426,7 +476,7 @@ class Main extends PluginBase{
 				$optional = str_contains($matches[1][$argNumber], '[');
 				$paramName = strtolower($matches[2][$argNumber]);
 				if(!str_contains($paramName, "|") and !str_contains($paramName, "/")){
-					if(!isset($matches[3][$argNumber]) and $this->getConfig()->get("Parse-with-Parameter-Names", true) === true){
+					if(!isset($matches[3][$argNumber])){
 						if(str_contains($paramName, "player") or str_contains($paramName, "target")){
 							$paramType = AvailableCommandsPacket::ARG_TYPE_TARGET;
 						}elseif(str_contains($paramName, "count")){

@@ -7,10 +7,14 @@
 #                       |___/                                                                                                                      #
 ####################################################################################################################################################
 
-# Parse with Argument Names
-# When enabled, the parser will take the argument name into account for the type returned
-Parse-with-Parameter-Names: true
-
 # Debug Command Highlighting
 # When enabled, a selection of debugging commands will be highlighted blue in the autofill
-Highlight-Debug: false
+Highlight Debugging Commands: false
+
+# Generate the default command enums
+# When enabled, the plugin will generate the default command enums such as item names and effects
+Generate Default Enums: true
+
+# Generate the command PocketMine autofill
+# When enabled, the plugin will generate the autofill command information for PocketMine's default commands
+Generate PocketMine Command Autofill: true
