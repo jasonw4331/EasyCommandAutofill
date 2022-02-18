@@ -9,7 +9,7 @@ EasyCommandAutofill is a plugin which adds commands to the client's autofill sys
 * Enables autofill on commands in your server
 
 # Future Additions
-* Parsing support for pocketmine default usage messages which do not follow vanilla style
+* Parsing support for pocketmine default usage messages which do not follow [vanilla style](https://docs.microsoft.com/en-us/minecraft/creator/documents/commandsintroduction#command-syntax)
 * Multi-lingual support for multiple language parsing
 
 # About
