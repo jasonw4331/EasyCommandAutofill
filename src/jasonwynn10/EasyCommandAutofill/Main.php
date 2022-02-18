@@ -528,7 +528,7 @@ class Main extends PluginBase{
 		return new CommandData(strtolower($name), $description, (int) ($this->getConfig()->get('Highlight Debugging Commands', false) !== false and in_array($name, $this->debugCommands, true)), $hasPermission, $this->generateAliasEnum($name, $aliases), $overloads);
 	}
 
-	private function generateAliasEnum(string $name, array $aliases) : ?CommandEnum {
+	public function generateAliasEnum(string $name, array $aliases) : ?CommandEnum {
 		if(count($aliases) > 0) {
 			if(!in_array($name, $aliases, true)) {
 				//work around a client bug which makes the original name not show when aliases are used
