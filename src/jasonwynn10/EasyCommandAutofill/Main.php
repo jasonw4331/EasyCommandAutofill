@@ -483,7 +483,7 @@ class Main extends PluginBase{
 			preg_match_all('/\h*([<\[])?\h*([\w|]+)\h*:?\h*([\w\h]+)?\h*[>\]]?\h*/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString)); // https://regex101.com/r/1REoJG/22
 			$argumentCount = count($matches[0])-1;
 			for($argNumber = 0; $argumentCount >= 0 and $argNumber <= $argumentCount; ++$argNumber) {
-				if(!isset($matches[1][$argNumber])) {
+				if($matches[1][$argNumber] === '' or $matches[3][$argNumber] === '') {
 					$paramName = strtolower($matches[2][$argNumber]);
 					$softEnums = $this->getSoftEnums();
 					if(isset($softEnums[$paramName])) {
