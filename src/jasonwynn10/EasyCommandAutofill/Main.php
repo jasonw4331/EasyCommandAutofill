@@ -55,26 +55,30 @@ class Main extends PluginBase{
 		$this->addHardcodedEnum(new CommandEnum('Boolean', ['true', 'false']), false);
 
 		$difficultyOptions = array_filter($worldConstants, fn(string $constant) => str_starts_with($constant, 'DIFFICULTY_'));
+		$difficultyOptions = array_map(fn(string $difficultyString) => substr($difficultyString, strlen('DIFFICULTY_')), $difficultyOptions);
 		$difficultyOptions = array_merge($difficultyOptions, array_map(fn(string $difficultyString) => $difficultyString[0], $difficultyOptions));
-		$difficultyOptions = array_map(fn(string $option) => strtolower($option), $difficultyOptions);
+		$difficultyOptions = array_map(fn(string $difficultyString) => strtolower($difficultyString), $difficultyOptions);
 		$this->addHardcodedEnum(new CommandEnum('Difficulty', $difficultyOptions), false);
 
 		$gamemodeOptions = array_map(fn(GameMode $gamemode) => $gamemode->name(), GameMode::getAll());
 		$gamemodeOptions = array_merge($gamemodeOptions, array_map(fn(string $gameModeString) => $gameModeString[0], $gamemodeOptions));
-		$gamemodeOptions = array_map(fn(string $option) => strtolower($option), $gamemodeOptions);
-		$this->addHardcodedEnum(new CommandEnum('GameMode', $gamemodeOptions), false); // TODO: change to translated name
+		$gamemodeOptions = array_map(fn(string $gameModeString) => strtolower($gameModeString), $gamemodeOptions);
+		$this->addHardcodedEnum(new CommandEnum('GameMode', $gamemodeOptions), false); // TODO: change to translated strings
 
 		$particleOptions = array_filter($levelEventConstants, fn(string $constant) => str_starts_with($constant, 'PARTICLE_'));
+		$particleOptions = array_map(fn(string $particleString) => substr($particleString, strlen('PARTICLE_')), $particleOptions);
 		$particleOptions = array_merge($particleOptions, array_keys((new \ReflectionClass(ParticleIds::class))->getConstants()));
-		$particleOptions = array_map(fn(string $particleName) => strtolower($particleName), $particleOptions);
+		$particleOptions = array_unique(array_map(fn(string $particleString) => strtolower($particleString), $particleOptions));
 		$this->addHardcodedEnum(new CommandEnum('Particle', $particleOptions), false);
 
 		$soundOptions = array_filter($levelEventConstants, fn(string $constant) => str_starts_with($constant, 'SOUND_'));
-		$soundOptions = array_map(fn(string $particleName) => strtolower($particleName), $soundOptions);
+		$soundOptions = array_map(fn(string $soundString) => substr($soundString, strlen('SOUND_')), $soundOptions);
+		$soundOptions = array_map(fn(string $soundString) => strtolower($soundString), $soundOptions);
 		$this->addHardcodedEnum(new CommandEnum('Sound', $soundOptions), false);
 
 		$timeSpecOptions = array_filter($worldConstants, fn(string $constant) => str_starts_with($constant, 'TIME_'));
-		$timeSpecOptions = array_map(fn(string $option) => strtolower($option), $timeSpecOptions);
+		$timeSpecOptions = array_map(fn(string $timeSpecString) => substr($timeSpecString, strlen('TIME_')), $timeSpecOptions);
+		$timeSpecOptions = array_map(fn(string $timeSpecString) => strtolower($timeSpecString), $timeSpecOptions);
 		$this->addHardcodedEnum(new CommandEnum('TimeSpec', $timeSpecOptions), false);
 
 		$this->addSoftEnum(new CommandEnum('Effect', StringToEffectParser::getInstance()->getKnownAliases()), false);
@@ -135,7 +139,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/defaultgamemode <gameMode: GameMode>'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/defaultgamemode <gameMode: GameMode> OR /defaultgamemode <gameMode: int>'));
 
 		$commandName = 'pocketmine:deop';
 		$command = $map->getCommand($commandName);
@@ -151,7 +155,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/difficulty <difficulty: Difficulty>'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/difficulty <difficulty: Difficulty> OR /difficulty <difficulty: int>'));
 
 		$commandName = 'pocketmine:dumpmemory';
 		$command = $map->getCommand($commandName);
@@ -183,7 +187,7 @@ class Main extends PluginBase{
 		$aliases = $command->getAliases();
 		$description = $command->getDescription();
 		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/gamemode <gameMode: GameMode> [player: target]'));
+		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/gamemode <gameMode: GameMode> [player: target] OR /gamemode <gameMode: int> [player: target]'));
 
 		$commandName = 'pocketmine:gc';
 		$command = $map->getCommand($commandName);
