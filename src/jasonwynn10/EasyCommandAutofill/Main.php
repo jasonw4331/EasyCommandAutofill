@@ -45,7 +45,7 @@ class Main extends PluginBase{
 			$this->setDefaultEnumData();
 
 		if($this->getConfig()->get('Generate PocketMine Command Autofill', true) !== false)
-			$this->setDefaultCommandData();
+			$this->setDefaultCommandUsages();
 	}
 
 	private function setDefaultEnumData() : void {
@@ -97,321 +97,62 @@ class Main extends PluginBase{
 		$this->addSoftEnum(new CommandEnum('Block', $blocks), false);
 	}
 
-	private function setDefaultCommandData() : void {
+	private function setDefaultCommandUsages() : void {
 		$map = $this->getServer()->getCommandMap();
 		$language = $this->getServer()->getLanguage();
 
-		$commandName = 'pocketmine:ban';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/ban <player: target> [reason: string]'));
+		$commandUsages = [
+			'ban' => '/ban <player: target> [reason: string]',
+			'ban-ip' => '/ban-ip <player: target> [reason: string] OR /ban-ip <address: string> [reason: string]',
+			'banlist' => '/banlist <ips|players>',
+			'clear' => '/clear [player: target]',
+			'defaultgamemode' => '/defaultgamemode <gameMode: GameMode> OR /defaultgamemode <gameMode: int>',
+			'deop' => '/deop <player: target>',
+			'difficulty' => '/difficulty <difficulty: Difficulty> OR /difficulty <difficulty: int>',
+			'dumpmemory' => '/dumpmemory',
+			'effect' => '/effect <player: target> <effect: Effect> [duration: int] [amplifier: int] [hideParticles: Boolean]',
+			'enchant' => '/enchant <player: target> <enchantmentId: int> [level: int] OR /enchant <player: target> <enchantmentName: Enchant> [level: int]',
+			'gamemode' => '/gamemode <gameMode: GameMode> [player: target] OR /gamemode <gameMode: int> [player: target]',
+			'gc' => '/gc',
+			'give' => '/give <player: target> <item: Item> [amount: int] [data: json]',
+			'kick' => '/kick <player: target> [reason: string]',
+			'kill' => '/kill <player: target>',
+			'list' => '/list',
+			'me' => '/me <message: string>',
+			'op' => '/op <player: target>',
+			'pardon' => '/pardon <player: target>',
+			'pardon-ip' => '/pardon-ip <player: target> OR /pardon-ip <address: string>',
+			'particle' => '/particle <player: target> <particle: string> <position: x y z> <relative: x y z> [count: int] [data: int]',
+			'plugins' => '/plugins',
+			'save-all' => '/save-all',
+			'save-off' => '/save-off',
+			'save-on' => '/save-on',
+			'say' => '/say <message: string>',
+			'seed' => '/seed',
+			'setworldspawn' => '/setworldspawn [position: x y z]',
+			'spawnpoint' => '/spawnpoint [player: target] [position: x y z]',
+			'status' => '/status',
+			'stop' => '/stop',
+			'tell' => '/tell <player: target> <message: string>',
+			'time' => '/time add <amount: int> OR /time set <amount: int> OR /time set <time: TimeSpec> OR /time <start|stop|query>',
+			'timings' => '/timings <on|off|paste|reset|report>',
+			'title' => '/title <player: target> <title: string> [subtitle: string] [time: int]',
+			'tp' => '/tp <player: target> [position: x y z]',
+			'transferserver' => '/transferserver <address: string> [port: int]',
+			'version' => '/version [plugin: string]',
+			'whitelist' => '/whitelist <add|remove|on|off|list|reload> [player: target]'
+		];
 
-		$commandName = 'pocketmine:ban-ip';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/ban-ip <player: target> [reason: string] OR /ban-ip <address: string> [reason: string]'));
-
-		$commandName = 'pocketmine:banlist';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/ban <player: target> [reason: string]'));
-
-		$commandName = 'pocketmine:clear';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/clear [player: target]'));
-
-		$commandName = 'pocketmine:defaultgamemode';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/defaultgamemode <gameMode: GameMode> OR /defaultgamemode <gameMode: int>'));
-
-		$commandName = 'pocketmine:deop';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/deop <player: target>'));
-
-		$commandName = 'pocketmine:difficulty';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/difficulty <difficulty: Difficulty> OR /difficulty <difficulty: int>'));
-
-		$commandName = 'pocketmine:dumpmemory';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/dumpmemory'));
-
-		$commandName = 'pocketmine:effect';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/effect <player: target> <effect: Effect> [duration: int] [amplifier: int] [hideParticles: Boolean]'));
-
-		$commandName = 'pocketmine:enchant';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/enchant <player: target> <enchantmentId: int> [level: int] OR /enchant <player: target> <enchantmentName: Enchant> [level: int]'));
-
-		$commandName = 'pocketmine:gamemode';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/gamemode <gameMode: GameMode> [player: target] OR /gamemode <gameMode: int> [player: target]'));
-
-		$commandName = 'pocketmine:gc';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/gc'));
-
-		$commandName = 'pocketmine:give';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/give <player: target> <item: Item> [amount: int] [data: json]'));
-
-		$commandName = 'pocketmine:kick';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/kick <player: target> [reason: string]'));
-
-		$commandName = 'pocketmine:kill';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/kill <player: target>'));
-
-		$commandName = 'pocketmine:list';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/list'));
-
-		$commandName = 'pocketmine:me';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/me <message: string>'));
-
-		$commandName = 'pocketmine:op';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/op <player: target>'));
-
-		$commandName = 'pocketmine:pardon';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/pardon <player: target>'));
-
-		$commandName = 'pocketmine:pardon-ip';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/pardon-ip <player: target> OR /pardon-ip <address: string>'));
-
-		$commandName = 'pocketmine:particle';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/particle <player: target> <particle: string> <position: x y z> <relative: x y z> [count: int] [data: int]'));
-
-		$commandName = 'pocketmine:plugins';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/plugins'));
-
-		$commandName = 'pocketmine:save-all';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/save-all'));
-
-		$commandName = 'pocketmine:save-off';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/save-off'));
-
-		$commandName = 'pocketmine:save-on';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/save-on'));
-
-		$commandName = 'pocketmine:say';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/say <message: string>'));
-
-		$commandName = 'pocketmine:seed';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/seed'));
-
-		$commandName = 'pocketmine:setworldspawn';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/setworldspawn [position: x y z]'));
-
-		$commandName = 'pocketmine:spawnpoint';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/spawnpoint [player: target] [position: x y z]'));
-
-		$commandName = 'pocketmine:status';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/status'));
-
-		$commandName = 'pocketmine:stop';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/stop'));
-
-		$commandName = 'pocketmine:tell';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/tell <player: target> <message: string>'));
-
-		$commandName = 'pocketmine:time';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/time add <amount: int> OR /time set <amount: int> OR /time set <time: TimeSpec> OR /time <start|stop|query>')); // TODO separate trees
-
-		$commandName = 'pocketmine:timings';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/timings <on|off|paste|reset|report>')); // TODO separate trees
-
-		$commandName = 'pocketmine:title';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/title <player: target> <title: string> [subtitle: string] [time: int]'));
-
-		$commandName = 'pocketmine:tp';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/tp <player: target> [position: x y z]'));
-
-		$commandName = 'pocketmine:transferserver';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/transferserver <address: string> [port: int]'));
-
-		$commandName = 'pocketmine:version';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/version [plugin: string]'));
-
-		$commandName = 'pocketmine:whitelist';
-		$command = $map->getCommand($commandName);
-		$name = $command->getName();
-		$aliases = $command->getAliases();
-		$description = $command->getDescription();
-		$description = $description instanceof Translatable ? $language->translate($description) : $description;
-		$this->addManualOverride($commandName, $this->generateGenericCommandData($name, $aliases, $description, '/whitelist <add|remove|on|off|list|reload> [player: target]'));
+		foreach($commandUsages as $commandName => $usage) {
+			$command = $map->getCommand('pocketmine:'.$commandName);
+			if(!$command instanceof Command)
+				continue;
+			$name = $command->getName();
+			$aliases = $command->getAliases();
+			$description = $command->getDescription();
+			$description = $description instanceof Translatable ? $language->translate($description) : $description;
+			$this->addManualOverride('pocketmine:'.$commandName, $this->generateGenericCommandData($name, $aliases, $description, $usage));
+		}
 	}
 
 	public function onDataPacketSend(DataPacketSendEvent $event) : void {
