@@ -21,6 +21,7 @@ use pocketmine\network\mcpe\protocol\UpdateSoftEnumPacket;
 use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
+use pocketmine\utils\TextFormat;
 use pocketmine\world\World;
 
 class Main extends PluginBase{
@@ -199,6 +200,37 @@ class Main extends PluginBase{
 			}
 			//$player->sendMessage($name.' is a manual override');
 			return $data; // yes I know this in a loop, ill deal with this logic later
+		}
+
+		if(method_exists($command, 'getSubCommands')) {
+			$val = $command->getSubCommands();
+		}elseif(method_exists($command, 'getSubcommands')){
+			$val = $command->getSubcommands();
+		}elseif(method_exists($command, 'getCommands')){
+			$val = $command->getCommands();
+		}
+
+		$customUsage = '/'.$command->getName().' ';
+		$allUsages = [];
+
+		if($val !== null and is_array($val)) {
+			foreach($val as $item) {
+				if(method_exists($item, 'getUsageMessage')){ // Commando virion
+					$allUsages[] = TextFormat::clean($item->getUsageMessage(), true);
+				}elseif(method_exists($item, 'getUsage')) { // MyPlot and CPlot
+					$allUsages[] = TextFormat::clean($item->getUsage(), true);
+				}
+				if(method_exists($item, 'getName')) { // generic
+					$customUsage .= TextFormat::clean($item->getName().'|', true);
+				}
+			}
+		}
+
+		if(strlen($customUsage) > strlen($usage)) { // if the custom usage is longer than the default usage, use the custom one
+			$usage = $customUsage;
+		}
+		if(count($allUsages) > 0) { // final say on usage
+			$usage = implode(' OR ', $allUsages);
 		}
 
 		return $this->generateGenericCommandData($name, $aliases, $description, $usage, $hasPermission);
