@@ -240,7 +240,7 @@ class Main extends PluginBase{
 		return $this->generateGenericCommandData($name, $aliases, $description, $usage, $hasPermission);
 	}
 
-	public function generateGenericCommandData(string $name, array $aliases, string $description, string $usage, bool $hasPermission = false) : CommandData {
+	private function generateGenericCommandData(string $name, array $aliases, string $description, string $usage, bool $hasPermission = false) : CommandData {
 		$hasPermission = (int)!$hasPermission;
 
 		if($usage === '' or $usage[0] === '%') {
@@ -306,7 +306,7 @@ class Main extends PluginBase{
 		return new CommandData(strtolower($name), $description, (int) ($this->getConfig()->get('Highlight Debugging Commands', false) !== false and in_array($name, $this->debugCommands, true)), $hasPermission, $this->generateAliasEnum($name, $aliases), $overloads);
 	}
 
-	public function generateAliasEnum(string $name, array $aliases) : ?CommandEnum {
+	private function generateAliasEnum(string $name, array $aliases) : ?CommandEnum {
 		if(count($aliases) > 0) {
 			if(!in_array($name, $aliases, true)) {
 				//work around a client bug which makes the original name not show when aliases are used
