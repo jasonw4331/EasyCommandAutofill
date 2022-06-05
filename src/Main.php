@@ -243,7 +243,7 @@ class Main extends PluginBase{
 	private function generateGenericCommandData(string $name, array $aliases, string $description, string $usage, bool $hasPermission = false) : CommandData {
 		$hasPermission = (int)!$hasPermission;
 
-		if($usage === '' or $usage[0] === '%') {
+		if(strlen($usage) < 1 or $usage[0] === '%') {
 			//$player->sendMessage($name.' is a generated default');
 			$data = $this->generatePocketMineDefaultCommandData($name, $aliases, $description);
 			$data->permission = $hasPermission;
