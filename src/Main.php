@@ -216,6 +216,9 @@ class Main extends PluginBase{
 
 		if($val !== null and is_array($val)) {
 			foreach($val as $item) {
+				if(!is_object($item)) {
+					continue;
+				}
 				if(method_exists($item, 'getUsageMessage')){ // Commando virion
 					$allUsages[] = TextFormat::clean($item->getUsageMessage(), true);
 				}elseif(method_exists($item, 'getUsage')) { // MyPlot and CPlot
