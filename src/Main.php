@@ -202,6 +202,7 @@ class Main extends PluginBase{
 			return $data; // yes I know this in a loop, ill deal with this logic later
 		}
 
+		$val = null;
 		if(method_exists($command, 'getSubCommands')) {
 			$val = $command->getSubCommands();
 		}elseif(method_exists($command, 'getSubcommands')){
