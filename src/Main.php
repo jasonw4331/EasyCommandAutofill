@@ -202,36 +202,47 @@ class Main extends PluginBase{
 			return $data; // yes I know this in a loop, ill deal with this logic later
 		}
 
-		$val = null;
+		$subCommands = null;
 		if(method_exists($command, 'getSubCommands')) {
-			$val = $command->getSubCommands();
+			$subCommands = $command->getSubCommands();
 		}elseif(method_exists($command, 'getSubcommands')){
-			$val = $command->getSubcommands();
+			$subCommands = $command->getSubcommands();
 		}elseif(method_exists($command, 'getCommands')){
-			$val = $command->getCommands();
+			$subCommands = $command->getCommands();
 		}
 
-		$customUsage = '/'.$command->getName().' ';
+		$customUsage = '';
 		$allUsages = [];
 
-		if($val !== null and is_array($val)) {
-			foreach($val as $item) {
-				if(!is_object($item)) {
+		if($subCommands !== null and is_array($subCommands)) {
+			foreach($subCommands as $subCommand) {
+				if(!is_object($subCommand)) {
 					continue;
 				}
-				if(method_exists($item, 'getUsageMessage')){ // Commando virion
-					$allUsages[] = TextFormat::clean($item->getUsageMessage(), true);
-				}elseif(method_exists($item, 'getUsage')) { // MyPlot and CPlot
-					$allUsages[] = TextFormat::clean($item->getUsage(), true);
+				if(method_exists($subCommand, 'getUsageMessage')){ // Commando virion
+					$allUsages[] = TextFormat::clean($subCommand->getUsageMessage(), true);
+				}elseif(method_exists($subCommand, 'getUsage')) { // MyPlot
+					$allUsages[] = TextFormat::clean($subCommand->getUsage(), true);
 				}
-				if(method_exists($item, 'getName')) { // generic
-					$customUsage .= TextFormat::clean($item->getName().'|', true);
+				if(method_exists($subCommand, 'getName')) { // generic
+					$customUsage .= TextFormat::clean($subCommand->getName().'|', true);
 				}
 			}
 		}
 
-		if(strlen($customUsage) > strlen($usage)) { // if the custom usage is longer than the default usage, use the custom one
-			$usage = $customUsage;
+		if(strlen($customUsage) > strlen($usage) - (strlen($name) + 2)) { // if the custom usage is longer than the default usage, use the custom one
+			if(str_ends_with($customUsage, '|'))
+				$customUsage = substr($customUsage, 0, -1);
+			$usageParams = array_unique(explode('|', $customUsage));
+			if(count($usageParams) > $player->getScreenLineHeight()) {
+				$usage = implode(' OR ', array_map(
+					static fn(string $param) => '/'.$name.' '.$param.' [args: string]',
+					$usageParams
+				));
+			}else{
+				$customUsage = implode('|', $usageParams);
+				$usage = '/'.$name.' '.$customUsage.' [args: string]';
+			}
 		}
 		if(count($allUsages) > 0) { // final say on usage
 			$usage = implode(' OR ', $allUsages);
