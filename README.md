@@ -3,7 +3,7 @@
 [![Poggit-Ci](https://poggit.pmmp.io/ci.shield/jasonwynn10/EasyCommandAutofill/EasyCommandAutofill)](https://poggit.pmmp.io/ci/jasonwynn10/EasyCommandAutofill/EasyCommandAutofill)
 [![Download count](https://poggit.pmmp.io/shield.dl.total/EasyCommandAutofill)](https://poggit.pmmp.io/p/EasyCommandAutofill)
 
-EasyCommandAutofill is a plugin which adds type-specified command args to MineCraft's autofill by parsing command usage messages. By adding this plugin to your server, all command usages written in the [vanilla style](https://docs.microsoft.com/en-us/minecraft/creator/documents/commandsintroduction#command-syntax) will be parsed and sent to MineCraft with autofill enabled.
+EasyCommandAutofill is a plugin which adds type-specified command args to Minecraft's autofill by parsing command usage messages. By adding this plugin to your server, all command usages written in the [vanilla style](https://docs.microsoft.com/en-us/minecraft/creator/documents/commandsintroduction#command-syntax) will be parsed and sent to Minecraft with autofill enabled.
 
 # Features
 * Enables autofill for commands on your server
