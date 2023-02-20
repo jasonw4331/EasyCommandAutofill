@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace jasonwynn10\EasyCommandAutofill;
 
 use pocketmine\command\Command;
@@ -22,6 +24,22 @@ use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\world\World;
+use function array_filter;
+use function array_keys;
+use function array_map;
+use function array_merge;
+use function array_unique;
+use function count;
+use function explode;
+use function in_array;
+use function preg_match_all;
+use function str_contains;
+use function str_starts_with;
+use function strlen;
+use function strtolower;
+use function substr;
+use function ucfirst;
+use const PREG_PATTERN_ORDER;
 
 final class Main extends PluginBase{
 	/** @var CommandData[] $manualOverrides */
@@ -35,7 +53,7 @@ final class Main extends PluginBase{
 	/** @var CommandEnumConstraint[] $enumConstraints */
 	private array $enumConstraints = [];
 
-	public function onEnable() : void {
+	public function onEnable() : void{
 		$this->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, \Closure::fromCallable([$this, "onDataPacketSend"]), EventPriority::HIGH, $this, false);
 
 		if($this->getConfig()->get('Highlight Debugging Commands', false) !== false)
@@ -48,7 +66,7 @@ final class Main extends PluginBase{
 			$this->setDefaultCommandUsages();
 	}
 
-	private function setDefaultEnumData() : void {
+	private function setDefaultEnumData() : void{
 		$worldConstants = array_keys((new \ReflectionClass(World::class))->getConstants());
 		$levelEventConstants = array_keys((new \ReflectionClass(LevelEvent::class))->getConstants());
 
@@ -89,7 +107,7 @@ final class Main extends PluginBase{
 		$this->addSoftEnum(new CommandEnum('Item', $itemOptions), false);
 
 		$blocks = [];
-		foreach($itemOptions as $alias) {
+		foreach($itemOptions as $alias){
 			$item = StringToItemParser::getInstance()->parse($alias);
 			if($item instanceof ItemBlock)
 				$blocks[] = $alias;
@@ -97,7 +115,7 @@ final class Main extends PluginBase{
 		$this->addSoftEnum(new CommandEnum('Block', $blocks), false);
 	}
 
-	private function setDefaultCommandUsages() : void {
+	private function setDefaultCommandUsages() : void{
 		$map = $this->getServer()->getCommandMap();
 		$language = $this->getServer()->getLanguage();
 
@@ -143,28 +161,28 @@ final class Main extends PluginBase{
 			'whitelist' => '/whitelist <add|remove|on|off|list|reload> [player: target]'
 		];
 
-		foreach($commandUsages as $commandName => $usage) {
-			$command = $map->getCommand('pocketmine:'.$commandName);
+		foreach($commandUsages as $commandName => $usage){
+			$command = $map->getCommand('pocketmine:' . $commandName);
 			if(!$command instanceof Command)
 				continue;
 			$name = $command->getName();
 			$aliases = $command->getAliases();
 			$description = $command->getDescription();
 			$description = $description instanceof Translatable ? $language->translate($description) : $description;
-			$this->addManualOverride('pocketmine:'.$commandName, $this->generateGenericCommandData($name, $aliases, $description, $usage));
+			$this->addManualOverride('pocketmine:' . $commandName, $this->generateGenericCommandData($name, $aliases, $description, $usage));
 		}
 	}
 
-	public function onDataPacketSend(DataPacketSendEvent $event) : void {
+	public function onDataPacketSend(DataPacketSendEvent $event) : void{
 		$packets = $event->getPackets();
-		foreach($packets as $pk) {
+		foreach($packets as $pk){
 			if(!$pk instanceof AvailableCommandsPacket)
 				return;
-			foreach($event->getTargets() as $networkSession) {
+			foreach($event->getTargets() as $networkSession){
 				$player = $networkSession->getPlayer();
 				$pk->commandData = [];
-				foreach($this->getServer()->getCommandMap()->getCommands() as $command) {
-					if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help" or !$command->testPermissionSilent($player))
+				foreach($this->getServer()->getCommandMap()->getCommands() as $command){
+					if(isset($pk->commandData[$command->getName()]) || $command->getName() === "help" || !$command->testPermissionSilent($player))
 						continue;
 
 					$pk->commandData[$command->getName()] = $this->generatePlayerSpecificCommandData($command, $networkSession->getPlayer());
@@ -176,7 +194,7 @@ final class Main extends PluginBase{
 		}
 	}
 
-	public function generatePlayerSpecificCommandData(Command $command, Player $player) : CommandData {
+	public function generatePlayerSpecificCommandData(Command $command, Player $player) : CommandData{
 		$language = $player->getLanguage();
 
 		$name = $command->getName();
@@ -191,10 +209,10 @@ final class Main extends PluginBase{
 			$this->getManualOverrides(),
 			fn(CommandData $data) => $name === $data->name
 		);
-		foreach($filteredData as $data) {
+		foreach($filteredData as $data){
 			$data->description = $description;
-			$data->permission = (int)!$hasPermission;
-			if(!$data->aliases instanceof CommandEnum) {
+			$data->permission = (int) !$hasPermission;
+			if(!$data->aliases instanceof CommandEnum){
 				$data->aliases = $this->generateAliasEnum($name, $aliases);
 			}
 			//$player->sendMessage($name.' is a manual override');
@@ -204,10 +222,10 @@ final class Main extends PluginBase{
 		return $this->generateGenericCommandData($name, $aliases, $description, $usage, $hasPermission);
 	}
 
-	public function generateGenericCommandData(string $name, array $aliases, string $description, string $usage, bool $hasPermission = false) : CommandData {
-		$hasPermission = (int)!$hasPermission;
+	public function generateGenericCommandData(string $name, array $aliases, string $description, string $usage, bool $hasPermission = false) : CommandData{
+		$hasPermission = (int) !$hasPermission;
 
-		if($usage === '' or $usage[0] === '%') {
+		if($usage === '' || $usage[0] === '%'){
 			//$player->sendMessage($name.' is a generated default');
 			$data = $this->generatePocketMineDefaultCommandData($name, $aliases, $description);
 			$data->permission = $hasPermission;
@@ -217,17 +235,17 @@ final class Main extends PluginBase{
 		$usages = explode(" OR ", $usage); // split command trees
 		$overloads = [];
 		$enumCount = 0;
-		for($tree = 0; $tree < count($usages); ++$tree) {
+		for($tree = 0; $tree < count($usages); ++$tree){
 			$usage = $usages[$tree];
 			$overloads[$tree] = [];
 			$commandString = explode(" ", $usage)[0];
 			preg_match_all('/\h*([<\[])?\h*([\w|]+)\h*:?\h*([\w\h]+)?\h*[>\]]?\h*/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString)); // https://regex101.com/r/1REoJG/22
-			$argumentCount = count($matches[0])-1;
-			for($argNumber = 0; $argumentCount >= 0 and $argNumber <= $argumentCount; ++$argNumber) {
-				if($matches[1][$argNumber] === '' or $matches[3][$argNumber] === '') {
+			$argumentCount = count($matches[0]) - 1;
+			for($argNumber = 0; $argumentCount >= 0 && $argNumber <= $argumentCount; ++$argNumber){
+				if($matches[1][$argNumber] === '' || $matches[3][$argNumber] === ''){
 					$paramName = strtolower($matches[2][$argNumber]);
 					$softEnums = $this->getSoftEnums();
-					if(isset($softEnums[$paramName])) {
+					if(isset($softEnums[$paramName])){
 						$enum = $softEnums[$paramName];
 					}else{
 						$this->addSoftEnum($enum = new CommandEnum($paramName, [$paramName]), false);
@@ -238,14 +256,14 @@ final class Main extends PluginBase{
 				$optional = str_contains($matches[1][$argNumber], '[');
 				$paramName = strtolower($matches[2][$argNumber]);
 				$paramType = strtolower($matches[3][$argNumber] ?? '');
-				if(in_array($paramType, array_keys(array_merge($this->softEnums, $this->hardcodedEnums)), true)) {
+				if(in_array($paramType, array_keys(array_merge($this->softEnums, $this->hardcodedEnums)), true)){
 					$enum = $this->getSoftEnums()[$paramType] ?? $this->getHardcodedEnums()[$paramType];
 					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional); // do not collapse because there is an $optional identifier in usage message
-				}elseif(str_contains($paramName, "|")) {
+				}elseif(str_contains($paramName, "|")){
 					$enumValues = explode("|", $paramName);
 					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . ++$enumCount, $enumValues), false);
 					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
-				}elseif(str_contains($paramName, "/")) {
+				}elseif(str_contains($paramName, "/")){
 					$enumValues = explode("/", $paramName);
 					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . ++$enumCount, $enumValues), false);
 					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
@@ -267,12 +285,12 @@ final class Main extends PluginBase{
 			}
 		}
 		//$player->sendMessage($name.' is a fully generated command');
-		return new CommandData(strtolower($name), $description, (int) ($this->getConfig()->get('Highlight Debugging Commands', false) !== false and in_array($name, $this->debugCommands, true)), $hasPermission, $this->generateAliasEnum($name, $aliases), $overloads);
+		return new CommandData(strtolower($name), $description, (int) ($this->getConfig()->get('Highlight Debugging Commands', false) !== false && in_array($name, $this->debugCommands, true)), $hasPermission, $this->generateAliasEnum($name, $aliases), $overloads);
 	}
 
-	public function generateAliasEnum(string $name, array $aliases) : ?CommandEnum {
-		if(count($aliases) > 0) {
-			if(!in_array($name, $aliases, true)) {
+	public function generateAliasEnum(string $name, array $aliases) : ?CommandEnum{
+		if(count($aliases) > 0){
+			if(!in_array($name, $aliases, true)){
 				//work around a client bug which makes the original name not show when aliases are used
 				$aliases[] = $name;
 			}
@@ -281,7 +299,7 @@ final class Main extends PluginBase{
 		return null;
 	}
 
-	private function generatePocketMineDefaultCommandData(string $name, array $aliases, string $description) : CommandData {
+	private function generatePocketMineDefaultCommandData(string $name, array $aliases, string $description) : CommandData{
 		return new CommandData(
 			strtolower($name),
 			$description,
@@ -296,7 +314,7 @@ final class Main extends PluginBase{
 		);
 	}
 
-	public function addManualOverride(string $commandName, CommandData $data, bool $sendPacket = true) : self {
+	public function addManualOverride(string $commandName, CommandData $data, bool $sendPacket = true) : self{
 		$this->manualOverrides[$commandName] = $data;
 		if(!$sendPacket)
 			return $this;
@@ -308,11 +326,11 @@ final class Main extends PluginBase{
 	/**
 	 * @return CommandData[]
 	 */
-	public function getManualOverrides() : array {
+	public function getManualOverrides() : array{
 		return $this->manualOverrides;
 	}
 
-	public function addDebugCommand(string $commandName, bool $sendPacket = true) : self {
+	public function addDebugCommand(string $commandName, bool $sendPacket = true) : self{
 		$this->debugCommands[] = $commandName;
 		if(!$sendPacket)
 			return $this;
@@ -324,11 +342,11 @@ final class Main extends PluginBase{
 	/**
 	 * @return string[]
 	 */
-	public function getDebugCommands() : array {
+	public function getDebugCommands() : array{
 		return $this->debugCommands;
 	}
 
-	public function addHardcodedEnum(CommandEnum $enum, bool $sendPacket = true) : self {
+	public function addHardcodedEnum(CommandEnum $enum, bool $sendPacket = true) : self{
 		foreach($this->softEnums as $softEnum)
 			if($enum->getName() === $softEnum->getName())
 				throw new \InvalidArgumentException("Hardcoded enum is already in soft enum list.");
@@ -343,11 +361,11 @@ final class Main extends PluginBase{
 	/**
 	 * @return CommandEnum[]
 	 */
-	public function getHardcodedEnums() : array {
+	public function getHardcodedEnums() : array{
 		return $this->hardcodedEnums;
 	}
 
-	public function addSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self {
+	public function addSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self{
 		foreach(array_merge($this->softEnums, $this->hardcodedEnums) as $enum2)
 			if($enum->getName() === $enum2->getName())
 				throw new \InvalidArgumentException("Enum is already in an enum list.");
@@ -360,7 +378,7 @@ final class Main extends PluginBase{
 		return $this;
 	}
 
-	public function updateSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self {
+	public function updateSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self{
 		if(!in_array($enum->getName(), array_keys($this->softEnums), true))
 			throw new \InvalidArgumentException("Enum is not in soft enum list.");
 		$this->softEnums[strtolower($enum->getName())] = $enum;
@@ -372,7 +390,7 @@ final class Main extends PluginBase{
 		return $this;
 	}
 
-	public function removeSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self {
+	public function removeSoftEnum(CommandEnum $enum, bool $sendPacket = true) : self{
 		unset($this->softEnums[strtolower($enum->getName())]);
 		if(!$sendPacket)
 			return $this;
@@ -385,23 +403,23 @@ final class Main extends PluginBase{
 	/**
 	 * @return CommandEnum[]
 	 */
-	public function getSoftEnums() : array {
+	public function getSoftEnums() : array{
 		return $this->softEnums;
 	}
 
-	public function addEnumConstraint(CommandEnumConstraint $enumConstraint) : self {
+	public function addEnumConstraint(CommandEnumConstraint $enumConstraint) : self{
 		foreach($this->hardcodedEnums as $hardcodedEnum)
-			if($enumConstraint->getEnum()->getName() === $hardcodedEnum->getName()) {
+			if($enumConstraint->getEnum()->getName() === $hardcodedEnum->getName()){
 				$this->enumConstraints[] = $enumConstraint;
-				foreach($this->getServer()->getOnlinePlayers() as $player) {
+				foreach($this->getServer()->getOnlinePlayers() as $player){
 					$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
 				}
 				return $this;
 			}
 		foreach($this->softEnums as $softEnum)
-			if($enumConstraint->getEnum()->getName() === $softEnum->getName()) {
+			if($enumConstraint->getEnum()->getName() === $softEnum->getName()){
 				$this->enumConstraints[] = $enumConstraint;
-				foreach($this->getServer()->getOnlinePlayers() as $player) {
+				foreach($this->getServer()->getOnlinePlayers() as $player){
 					$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
 				}
 				return $this;
@@ -412,7 +430,7 @@ final class Main extends PluginBase{
 	/**
 	 * @return CommandEnumConstraint[]
 	 */
-	public function getEnumConstraints() : array {
+	public function getEnumConstraints() : array{
 		return $this->enumConstraints;
 	}
 }
