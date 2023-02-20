@@ -23,17 +23,17 @@ use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\world\World;
 
-class Main extends PluginBase{
+final class Main extends PluginBase{
 	/** @var CommandData[] $manualOverrides */
-	protected $manualOverrides = [];
+	private array $manualOverrides = [];
 	/** @var string[] $debugCommands */
-	protected $debugCommands = [];
+	private array $debugCommands = [];
 	/** @var CommandEnum[] $hardcodedEnums */
-	protected $hardcodedEnums = [];
+	private array $hardcodedEnums = [];
 	/** @var CommandEnum[] $softEnums */
-	protected $softEnums = [];
+	private array $softEnums = [];
 	/** @var CommandEnumConstraint[] $enumConstraints */
-	protected $enumConstraints = [];
+	private array $enumConstraints = [];
 
 	public function onEnable() : void {
 		$this->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, \Closure::fromCallable([$this, "onDataPacketSend"]), EventPriority::HIGH, $this, false);
