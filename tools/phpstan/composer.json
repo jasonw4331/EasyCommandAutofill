@@ -9,7 +9,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"jasonwynn10\\EasyCommandAutofill\\": "../src"
+			"jasonwynn10\\EasyCommandAutofill\\": "../../src"
 		}
 	},
 	"config": {
