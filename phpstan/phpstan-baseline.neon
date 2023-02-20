@@ -21,6 +21,11 @@ parameters:
 			path: ../src/Main.php
 
 		-
+			message: "#^Parameter \\#1 \\$target of method pocketmine\\\\command\\\\Command\\:\\:testPermissionSilent\\(\\) expects pocketmine\\\\command\\\\CommandSender, pocketmine\\\\player\\\\Player\\|null given\\.$#"
+			count: 1
+			path: ../src/Main.php
+
+		-
 			message: "#^Parameter \\#2 \\$callback of function array_filter expects callable\\(int\\|string\\)\\: mixed, Closure\\(string\\)\\: bool given\\.$#"
 			count: 1
 			path: ../src/Main.php
@@ -33,5 +38,10 @@ parameters:
 		-
 			message: "#^Parameter \\#2 \\$enumValues of class pocketmine\\\\network\\\\mcpe\\\\protocol\\\\types\\\\command\\\\CommandEnum constructor expects array\\<int, string\\>, array\\<int\\|string\\> given\\.$#"
 			count: 4
+			path: ../src/Main.php
+
+		-
+			message: "#^Parameter \\#2 \\$player of method jasonwynn10\\\\EasyCommandAutofill\\\\Main\\:\\:generatePlayerSpecificCommandData\\(\\) expects pocketmine\\\\player\\\\Player, pocketmine\\\\player\\\\Player\\|null given\\.$#"
+			count: 1
 			path: ../src/Main.php
 
