@@ -41,7 +41,11 @@ parameters:
 			path: ../../src/Main.php
 
 		-
-			message: "#^Parameter \\#2 \\$player of method jasonwynn10\\\\EasyCommandAutofill\\\\Main\\:\\:generatePlayerSpecificCommandData\\(\\) expects pocketmine\\\\player\\\\Player, pocketmine\\\\player\\\\Player\\|null given\\.$#"
+			message: "#^Parameter \\#2 \\$enumValues of class pocketmine\\\\network\\\\mcpe\\\\protocol\\\\types\\\\command\\\\CommandEnum constructor expects array\\<int, string\\>, array\\<string, string\\> given\\.$#"
 			count: 1
 			path: ../../src/Main.php
 
+		-
+			message: "#^Parameter \\#2 \\$player of method jasonwynn10\\\\EasyCommandAutofill\\\\Main\\:\\:generatePlayerSpecificCommandData\\(\\) expects pocketmine\\\\player\\\\Player, pocketmine\\\\player\\\\Player\\|null given\\.$#"
+			count: 1
+			path: ../../src/Main.php
