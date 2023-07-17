@@ -16,6 +16,7 @@ use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnumConstraint;
+use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\LevelEvent;
 use pocketmine\network\mcpe\protocol\types\ParticleIds;
@@ -237,7 +238,7 @@ final class Main extends PluginBase{
 		$enumCount = 0;
 		for($tree = 0; $tree < count($usages); ++$tree){
 			$usage = $usages[$tree];
-			$overloads[$tree] = [];
+			$treeOverloads = [];
 			$commandString = explode(" ", $usage)[0];
 			preg_match_all('/\h*([<\[])?\h*([\w|]+)\h*:?\h*([\w\h]+)?\h*[>\]]?\h*/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString)); // https://regex101.com/r/1REoJG/22
 			$argumentCount = count($matches[0]) - 1;
@@ -250,7 +251,7 @@ final class Main extends PluginBase{
 					}else{
 						$this->addSoftEnum($enum = new CommandEnum($paramName, [$paramName]), false);
 					}
-					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false); // collapse and assume required because no $optional identifier exists in usage message
+					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false); // collapse and assume required because no $optional identifier exists in usage message
 					continue;
 				}
 				$optional = str_contains($matches[1][$argNumber], '[');
@@ -258,15 +259,15 @@ final class Main extends PluginBase{
 				$paramType = strtolower($matches[3][$argNumber] ?? '');
 				if(in_array($paramType, array_keys(array_merge($this->softEnums, $this->hardcodedEnums)), true)){
 					$enum = $this->getSoftEnums()[$paramType] ?? $this->getHardcodedEnums()[$paramType];
-					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional); // do not collapse because there is an $optional identifier in usage message
+					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional); // do not collapse because there is an $optional identifier in usage message
 				}elseif(str_contains($paramName, "|")){
 					$enumValues = explode("|", $paramName);
 					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . ++$enumCount, $enumValues), false);
-					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
+					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
 				}elseif(str_contains($paramName, "/")){
 					$enumValues = explode("/", $paramName);
 					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . ++$enumCount, $enumValues), false);
-					$overloads[$tree][$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
+					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
 				}else{
 					$paramType = match ($paramType) { // ordered by constant value
 						'int' => AvailableCommandsPacket::ARG_TYPE_INT,
@@ -280,12 +281,21 @@ final class Main extends PluginBase{
 						'json' => AvailableCommandsPacket::ARG_TYPE_JSON,
 						'command' => AvailableCommandsPacket::ARG_TYPE_COMMAND,
 					};
-					$overloads[$tree][$argNumber] = CommandParameter::standard($paramName, $paramType, 0, $optional);
+					$treeOverloads[$argNumber] = CommandParameter::standard($paramName, $paramType, 0, $optional);
 				}
 			}
+			$overloads[$tree] = new CommandOverload(false, $treeOverloads);
 		}
 		//$player->sendMessage($name.' is a fully generated command');
-		return new CommandData(strtolower($name), $description, (int) ($this->getConfig()->get('Highlight Debugging Commands', false) !== false && in_array($name, $this->debugCommands, true)), $hasPermission, $this->generateAliasEnum($name, $aliases), $overloads);
+		return new CommandData(
+			strtolower($name),
+			$description,
+			(int) ($this->getConfig()->get('Highlight Debugging Commands', false) !== false && in_array($name, $this->debugCommands, true)),
+			$hasPermission,
+			$this->generateAliasEnum($name, $aliases),
+			$overloads,
+			[]
+		);
 	}
 
 	public function generateAliasEnum(string $name, array $aliases) : ?CommandEnum{
@@ -307,10 +317,11 @@ final class Main extends PluginBase{
 			1,
 			$this->generateAliasEnum($name, $aliases),
 			[
-				[
+				new CommandOverload(false, [
 					CommandParameter::standard("args", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, true)
-				]
-			]
+				])
+			],
+			[]
 		);
 	}
 
