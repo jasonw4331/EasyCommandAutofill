@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace jasonwynn10\EasyCommandAutofill;
+namespace jasonw4331\EasyCommandAutofill;
 
 use pocketmine\command\Command;
 use pocketmine\entity\effect\StringToEffectParser;

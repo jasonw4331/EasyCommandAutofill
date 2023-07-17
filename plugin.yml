@@ -1,7 +1,7 @@
 name: EasyCommandAutofill
-main: jasonwynn10\EasyCommandAutofill\Main
-src-namespace-prefix: jasonwynn10\EasyCommandAutofill
-version: 3.0.2
-api: 4.0.0
+main: jasonw4331\EasyCommandAutofill\Main
+src-namespace-prefix: jasonw4331\EasyCommandAutofill
+version: 3.1.0
+api: 5.3.0
 description: "A plugin which adds commands to the client's autofill by parsing usage messages"
-author: "jasonwynn10"
+author: "jasonw4331"
