@@ -13,4 +13,7 @@ projects:
       - phpstan.neon.dist
       - phpstan-baseline.php
       - .php-cs-fixer.php
+    libs:
+      - src: Muqsit/SimplePacketHandler/SimplePacketHandler
+        version: ^0.1
 ...
