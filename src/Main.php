@@ -102,12 +102,21 @@ final class Main extends PluginBase{
 		$timeSpecOptions = array_map(fn(string $timeSpecString) => mb_strtolower($timeSpecString), $timeSpecOptions);
 		$this->addHardcodedEnum(new CommandEnum('TimeSpec', $timeSpecOptions, false), false);
 
-		$this->addSoftEnum(new CommandEnum('Effect', StringToEffectParser::getInstance()->getKnownAliases(), true), false);
-		$this->addSoftEnum(new CommandEnum('Enchant', StringToEnchantmentParser::getInstance()->getKnownAliases(), true), false);
-		$this->addSoftEnum(new CommandEnum('Enchantment', StringToEnchantmentParser::getInstance()->getKnownAliases(), true), false); // proper english word
+		/** @var string[] $effectOptions */
+		$effectOptions = StringToEffectParser::getInstance()->getKnownAliases();
+		$this->addSoftEnum(new CommandEnum('Effect', $effectOptions, true), false);
+		$this->addSoftEnum(new CommandEnum('Effects', $effectOptions, true), false);
+		/** @var string[] $enchantmentOptions */
+		$enchantmentOptions = StringToEnchantmentParser::getInstance()->getKnownAliases();
+		$this->addSoftEnum(new CommandEnum('Enchant', $enchantmentOptions, true), false);
+		$this->addSoftEnum(new CommandEnum('Enchants', $enchantmentOptions, true), false);
+		$this->addSoftEnum(new CommandEnum('Enchantment', $enchantmentOptions, true), false); // proper english word
+		$this->addSoftEnum(new CommandEnum('Enchantments', $enchantmentOptions, true), false); // proper english word (plural)
+		/** @var string[] $itemOptions */
 		$itemOptions = StringToItemParser::getInstance()->getKnownAliases();
 		$itemOptions = array_filter($itemOptions, fn(string $itemName) => str_starts_with($itemName, 'minecraft:'));
 		$this->addSoftEnum(new CommandEnum('Item', $itemOptions, true), false);
+		$this->addSoftEnum(new CommandEnum('Items', $itemOptions, true), false);
 
 		$blocks = [];
 		foreach($itemOptions as $alias){
