@@ -311,6 +311,9 @@ final class Main extends PluginBase{
 		return null;
 	}
 
+	/**
+	 * @phpstan-param string[] $aliases
+	 */
 	private function generatePocketMineDefaultCommandData(string $name, array $aliases, string $description) : CommandData{
 		return new CommandData(
 			mb_strtolower($name),

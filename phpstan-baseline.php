@@ -2,11 +2,6 @@
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
-	'message' => '#^Method jasonw4331\\\\EasyCommandAutofill\\\\Main\\:\\:generatePocketMineDefaultCommandData\\(\\) has parameter \\$aliases with no value type specified in iterable type array\\.$#',
-	'count' => 1,
-	'path' => __DIR__ . '/src/Main.php',
-];
-$ignoreErrors[] = [
 	'message' => '#^Parameter \\#1 \\$input of method pocketmine\\\\item\\\\StringToItemParser\\:\\:parse\\(\\) expects string, int\\|string given\\.$#',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Main.php',
