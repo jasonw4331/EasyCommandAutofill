@@ -2,17 +2,17 @@
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
-	'message' => '#^Method jasonwynn10\\\\EasyCommandAutofill\\\\Main\\:\\:generateAliasEnum\\(\\) has parameter \\$aliases with no value type specified in iterable type array\\.$#',
+	'message' => '#^Method jasonw4331\\\\EasyCommandAutofill\\\\Main\\:\\:generateAliasEnum\\(\\) has parameter \\$aliases with no value type specified in iterable type array\\.$#',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Main.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Method jasonwynn10\\\\EasyCommandAutofill\\\\Main\\:\\:generateGenericCommandData\\(\\) has parameter \\$aliases with no value type specified in iterable type array\\.$#',
+	'message' => '#^Method jasonw4331\\\\EasyCommandAutofill\\\\Main\\:\\:generateGenericCommandData\\(\\) has parameter \\$aliases with no value type specified in iterable type array\\.$#',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Main.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Method jasonwynn10\\\\EasyCommandAutofill\\\\Main\\:\\:generatePocketMineDefaultCommandData\\(\\) has parameter \\$aliases with no value type specified in iterable type array\\.$#',
+	'message' => '#^Method jasonw4331\\\\EasyCommandAutofill\\\\Main\\:\\:generatePocketMineDefaultCommandData\\(\\) has parameter \\$aliases with no value type specified in iterable type array\\.$#',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Main.php',
 ];
@@ -47,7 +47,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/src/Main.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Parameter \\#2 \\$player of method jasonwynn10\\\\EasyCommandAutofill\\\\Main\\:\\:generatePlayerSpecificCommandData\\(\\) expects pocketmine\\\\player\\\\Player, pocketmine\\\\player\\\\Player\\|null given\\.$#',
+	'message' => '#^Parameter \\#2 \\$player of method jasonw4331\\\\EasyCommandAutofill\\\\Main\\:\\:generatePlayerSpecificCommandData\\(\\) expects pocketmine\\\\player\\\\Player, pocketmine\\\\player\\\\Player\\|null given\\.$#',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Main.php',
 ];
