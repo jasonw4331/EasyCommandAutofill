@@ -253,11 +253,11 @@ final class Main extends PluginBase{
 			for($argNumber = 0; $argumentCount >= 0 && $argNumber <= $argumentCount; ++$argNumber){
 				if($matches[1][$argNumber] === '' || $matches[3][$argNumber] === ''){
 					$paramName = mb_strtolower($matches[2][$argNumber]);
-					$softEnums = $this->getSoftEnums();
+					$softEnums = $this->getHardcodedEnums();
 					if(isset($softEnums[$paramName])){
 						$enum = $softEnums[$paramName];
 					}else{
-						$this->addSoftEnum($enum = new CommandEnum($paramName, [$paramName], true), false);
+						$this->addHardcodedEnum($enum = new CommandEnum($paramName, [$paramName], false), false);
 					}
 					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false); // collapse and assume required because no $optional identifier exists in usage message
 					continue;
