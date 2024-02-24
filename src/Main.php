@@ -241,38 +241,52 @@ final class Main extends PluginBase{
 			return $data;
 		}
 
-		$usages = explode(" OR ", $usage); // split command trees
+		$usages = explode(" OR ", $usage); // split command trees by "whitespace OR whitespace"
 		$overloads = [];
 		$enumCount = 0;
+		// iterate through each command tree to be displayed vertically in the client
 		for($tree = 0; $tree < count($usages); ++$tree){
 			$usage = $usages[$tree];
 			$treeOverloads = [];
-			$commandString = explode(" ", $usage)[0];
-			preg_match_all('/\h*([<\[])?\h*([\w|]+)\h*:?\h*([\w\h]+)?\h*[>\]]?\h*/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString)); // https://regex101.com/r/1REoJG/22
+			$commandString = explode(" ", $usage)[0]; // acquire the command name and slash
+			/*
+			 * Regex below is used to parse command usage message while recording param types and names. Tested here: https://regex101.com/r/1REoJG/22
+			 * $matches[0] is the entire command usage string.
+			 * $matches[1] is the identifier for optional/required parameters. If empty, the parameter is assumed to be required as a solo enum.
+			 * $matches[2] is the parameter name.
+			 * $matches[3] is the parameter type. If empty, the parameter is assumed to be raw text.
+			 */
+			preg_match_all('/\h*([<\[])?\h*([\w|]+)\h*:?\h*([\w\h]+)?\h*[>\]]?\h*/iu', $usage, $matches, PREG_PATTERN_ORDER, strlen($commandString));
 			$argumentCount = count($matches[0]) - 1;
 			for($argNumber = 0; $argumentCount >= 0 && $argNumber <= $argumentCount; ++$argNumber){
+				// This if statement is for reading params which are assumed to be required as solo enums.
 				if($matches[1][$argNumber] === '' || $matches[3][$argNumber] === ''){
 					$paramName = mb_strtolower($matches[2][$argNumber]);
 					$softEnums = $this->getHardcodedEnums();
 					if(isset($softEnums[$paramName])){
 						$enum = $softEnums[$paramName];
 					}else{
-						$this->addHardcodedEnum($enum = new CommandEnum($paramName, [$paramName], false), false);
+						$this->addHardcodedEnum($enum = new CommandEnum($paramName, [$paramName], false), false); // Minecraft version 1.20.60+ forces solo enums to be hard coded.
 					}
-					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false); // collapse and assume required because no $optional identifier exists in usage message
+					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, false); // collapse down to enum name and assume required because no $optional identifier in usage message
 					continue;
 				}
+				/*
+				 * This section is for parsing the parameter information once we know there is an identifier for
+				 * optional/required status.
+				 */
 				$optional = str_contains($matches[1][$argNumber], '[');
 				$paramName = mb_strtolower($matches[2][$argNumber]);
 				$paramType = mb_strtolower($matches[3][$argNumber] ?? '');
+				// This if statement is for reading params which are assumed to be optional enums.
 				if(in_array($paramType, array_keys(array_merge($this->softEnums, $this->hardcodedEnums)), true)){
 					$enum = $this->getSoftEnums()[$paramType] ?? $this->getHardcodedEnums()[$paramType];
 					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, 0, $optional); // do not collapse because there is an $optional identifier in usage message
-				}elseif(str_contains($paramName, "|")){
+				}elseif(str_contains($paramName, "|")){ // This if statement is for reading enums of multiple values.
 					$enumValues = explode("|", $paramName);
 					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . ++$enumCount, $enumValues, true), false);
 					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
-				}elseif(str_contains($paramName, "/")){
+				}elseif(str_contains($paramName, "/")){ // This if statement is for reading enums of multiple values.
 					$enumValues = explode("/", $paramName);
 					$this->addSoftEnum($enum = new CommandEnum($name . " Enum#" . ++$enumCount, $enumValues, true), false);
 					$treeOverloads[$argNumber] = CommandParameter::enum($paramName, $enum, CommandParameter::FLAG_FORCE_COLLAPSE_ENUM, $optional);
@@ -292,7 +306,7 @@ final class Main extends PluginBase{
 					$treeOverloads[$argNumber] = CommandParameter::standard($paramName, $paramType, 0, $optional);
 				}
 			}
-			$overloads[$tree] = new CommandOverload(false, $treeOverloads);
+			$overloads[$tree] = new CommandOverload(false, $treeOverloads); // only the gamerule command uses chaining
 		}
 		//$player->sendMessage($name.' is a fully generated command');
 		return new CommandData(
@@ -344,7 +358,7 @@ final class Main extends PluginBase{
 		if(!$sendPacket)
 			return $this;
 		foreach($this->getServer()->getOnlinePlayers() as $player)
-			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
+			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket()); // send empty packet because the event triggers logic above.
 		return $this;
 	}
 
@@ -360,7 +374,7 @@ final class Main extends PluginBase{
 		if(!$sendPacket)
 			return $this;
 		foreach($this->getServer()->getOnlinePlayers() as $player)
-			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
+			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket()); // send empty packet because the event triggers logic above.
 		return $this;
 	}
 
@@ -379,7 +393,7 @@ final class Main extends PluginBase{
 		if(!$sendPacket)
 			return $this;
 		foreach($this->getServer()->getOnlinePlayers() as $player)
-			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
+			$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket()); // send empty packet because the event triggers logic above.
 		return $this;
 	}
 
@@ -437,7 +451,7 @@ final class Main extends PluginBase{
 			if($enumConstraint->getEnum()->getName() === $hardcodedEnum->getName()){
 				$this->enumConstraints[] = $enumConstraint;
 				foreach($this->getServer()->getOnlinePlayers() as $player){
-					$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
+					$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket()); // send empty packet because the event triggers logic above.
 				}
 				return $this;
 			}
@@ -445,7 +459,7 @@ final class Main extends PluginBase{
 			if($enumConstraint->getEnum()->getName() === $softEnum->getName()){
 				$this->enumConstraints[] = $enumConstraint;
 				foreach($this->getServer()->getOnlinePlayers() as $player){
-					$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket());
+					$player->getNetworkSession()->sendDataPacket(new AvailableCommandsPacket()); // send empty packet because the event triggers logic above.
 				}
 				return $this;
 			}
